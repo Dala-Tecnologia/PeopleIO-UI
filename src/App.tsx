@@ -1,9 +1,7 @@
 import './App.css'
 import { FormularioColaborador } from './Components/Form/FormularioColaborador'
 
-function App() {
-
-
+export function App() {
   return (
     <>
       <FormularioColaborador />
@@ -11,4 +9,4 @@ function App() {
   )
 }
 
-export default App
+
