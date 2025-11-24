@@ -1,6 +1,6 @@
 import './App.css'
-import Header from './Components/base/Header'
-import { FormularioColaborador } from './Components/Form/FormularioColaborador'
+import Header from './components/base/Header'
+import { FormularioColaborador } from './components/Form/FormularioColaborador'
 
 export function App() {
   return (
