@@ -1,0 +1,15 @@
+# Ignore node_modules
+node_modules/
+
+# Ignore source code
+src/
+public/
+
+# Ignore configs
+.vscode/
+.idea/
+*.log
+*.md
+
+# Only keep dist
+!dist/
