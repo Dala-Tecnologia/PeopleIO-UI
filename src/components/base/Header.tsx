@@ -8,7 +8,7 @@ const Header = () => {
           People IO
         </h1>
 
-        {/* Navegação */}
+        {/* Navegação 
         <nav className="space-x-6">
           <a href="/" className="hover:text-gray-200">
             Home
@@ -21,12 +21,15 @@ const Header = () => {
           </a>
         </nav>
 
-        {/* Ações (ex: perfil ou logout) */}
+        */}
+
+        {/* Ações (ex: perfil ou logout) 
         <div>
           <button className="bg-white text-blue-600 px-4 py-2 rounded hover:bg-gray-100">
             Sair
           </button>
         </div>
+        */}
       </div>
     </header>
   );
