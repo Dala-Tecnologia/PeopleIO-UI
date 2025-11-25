@@ -1,0 +1,114 @@
+import type { Control, UseFormRegister, UseFormSetValue, FieldErrors  } from "react-hook-form";
+import { Controller } from "react-hook-form";
+import type { FormData } from "@/types/FormData";
+import { DatePicker } from "@/components/ui/datepicker";
+import { FileUpload } from "@/components/FileUpload";
+
+type Props = {
+  register: UseFormRegister<FormData>;
+  control: Control<FormData>;
+  setValue: UseFormSetValue<FormData>;
+  errors: FieldErrors<FormData>;
+};
+
+export const DocumentosForm = ({ register, control, setValue }: Props) => {
+  return (
+    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <div>
+        <label className="pio-label">RG</label>
+        <input {...register("identidadeNumero")} className="pio-input" />
+      </div>
+
+      <div>
+        <label className="pio-label">Órgão Emissor</label>
+        <input {...register("identidadeOrgaoEmissor")} className="pio-input" />
+      </div>
+
+      <div>
+        <label className="pio-label">UF do RG</label>
+        <input {...register("identidadeUF")} className="pio-input" />
+      </div>
+
+      <div>
+        <label className="pio-label">Data de Emissão</label>
+        <Controller
+          control={control}
+          name="identidadeDataEmissao"
+          render={({ field }) => (
+            <DatePicker
+              value={field.value ? new Date(field.value) : undefined}
+              onChange={(date) => field.onChange(date?.toISOString() ?? "")}
+            />
+          )}
+        />
+      </div>
+
+      <div>
+        <label className="pio-label">CTPS Número</label>
+        <input {...register("ctpsNumero")} className="pio-input" />
+      </div>
+
+      <div>
+        <label className="pio-label">CTPS Série</label>
+        <input {...register("ctpsSerie")} className="pio-input" />
+      </div>
+
+      <div>
+        <label className="pio-label">Data Emissão CTPS</label>
+        <Controller
+          control={control}
+          name="ctpsDataEmissao"
+          render={({ field }) => (
+            <DatePicker
+              value={field.value ? new Date(field.value) : undefined}
+              onChange={(date) => field.onChange(date?.toISOString() ?? "")}
+            />
+          )}
+        />
+      </div>
+      <FileUpload
+        label="RG (PDF/Imagem)"
+        onSelected={(file) =>
+            setValue("arquivoRG", file ? {
+            nomeArquivo: file.name,
+            tipoMime: file.type,
+            url: URL.createObjectURL(file),
+            dataUpload: new Date().toISOString(),
+            } : {})}
+      />
+
+      <FileUpload
+        label="CNH"
+        onSelected={(file) =>
+            setValue("arquivoCNH", file ? {
+            nomeArquivo: file.name,
+            tipoMime: file.type,
+            url: URL.createObjectURL(file),
+            dataUpload: new Date().toISOString(),
+            } : {})}
+      />
+
+      <FileUpload
+        label="CPF"
+        onSelected={(file) =>
+            setValue("arquivoCPF", file ? {
+            nomeArquivo: file.name,
+            tipoMime: file.type,
+            url: URL.createObjectURL(file),
+            dataUpload: new Date().toISOString(),
+            } : {})}
+      />
+
+      <FileUpload
+        label="Comprovante de Residência"
+        onSelected={(file) =>
+            setValue("arquivoComprovanteResidencia", file ? {
+            nomeArquivo: file.name,
+            tipoMime: file.type,
+            url: URL.createObjectURL(file),
+            dataUpload: new Date().toISOString(),
+            } : {})}
+      />
+    </div>
+  );
+};

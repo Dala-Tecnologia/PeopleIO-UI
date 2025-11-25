@@ -1,35 +1,130 @@
-//import { useForm } from "react-hook-form";
-import { useState } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { estados } from "../../constrants/estados";
-import { DatePicker } from "../ui/datepicker";
-import { insertMaskInCEP } from "@/functions/address";
-import { insertMaskInPhone } from "@/functions/phone";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { colaboradorSchema } from "@/components/schemas/colaboradorSchema";
 
+import type { ArquivoForm, FormData } from "@/types/FormData";
+
+import { DadosPessoaisForm } from "./DadosPessoaisForm";
+import { DocumentosForm } from "./DocumentosForm";
+import { EnderecoForm } from "./EnderecoForm";
 
 export const FormularioColaborador = () => {
-  //const { register } = useForm();
-  //const { onSubmit } = () => {}  const [selected, setSelected] = useState(people[3])
-  const [cep, setCep] = useState("");
-  const [telefone, setTelefone] = useState("");
+  const {
+    control,
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<FormData>({
+    resolver: zodResolver(colaboradorSchema),
+    mode: "onChange",
+  });
 
+  /** -----------------------------------------
+   *  Upload para Azure Blob
+   *  ------------------------------------------*/
+  async function uploadToBlob(file: File, filename: string) {
+    const sasToken = "SEU_SAS_AQUI";
+    const containerUrl = `https://peopleiostoragedatadev.blob.core.windows.net/documents`;
 
-  function applyCEPMask(input: string){
-    const masked = insertMaskInCEP(input);
-    setCep(masked);
+    const url = `${containerUrl}/${filename}?${sasToken}`;
+
+    await fetch(url, {
+      method: "PUT",
+      headers: {
+        "x-ms-blob-type": "BlockBlob",
+        "Content-Type": file.type,
+      },
+      body: file,
+    });
+
+    return `${containerUrl}/${filename}`;
   }
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTelefone(insertMaskInPhone(e.target.value));
-  };
 
+  /** -----------------------------------------
+   *  Resolve um único campo File
+   *  ------------------------------------------*/
+  async function processFile(file: ArquivoForm, prefix: string, nome: string) {
+    if (!file) return null;
+
+    // aqui sempre será File | null
+    const filename = `${prefix}-${crypto.randomUUID()}-${nome}.pdf`;
+    return await uploadToBlob(file, filename);
+  }
+
+  /** -----------------------------------------
+   *  SUBMIT
+   *  ------------------------------------------*/
+  async function onSubmit(data: FormData) {
+    // Faz uploads
+    const rgUrl = await processFile(data.arquivoRG, "RG", data.nome);
+    const cnhUrl = await processFile(data.arquivoCNH, "CNH", data.nome);
+    const cpfUrl = await processFile(data.arquivoCPF, "CPF", data.nome);
+    const crUrl = await processFile(
+      data.arquivoComprovanteResidencia,
+      "CR",
+      data.nome
+    );
+
+    /** Monta payload final com tipo Arquivo (esperado pela API) */
+    const payload = {
+      ...data,
+
+      arquivoRG: rgUrl
+        ? {
+            nomeArquivo: rgUrl.split("/").pop()!,
+            url: rgUrl,
+            tipoMime: "application/pdf",
+            dataUpload: new Date().toISOString(),
+          }
+        : null,
+
+      arquivoCNH: cnhUrl
+        ? {
+            nomeArquivo: cnhUrl.split("/").pop()!,
+            url: cnhUrl,
+            tipoMime: "application/pdf",
+            dataUpload: new Date().toISOString(),
+          }
+        : null,
+
+      arquivoCPF: cpfUrl
+        ? {
+            nomeArquivo: cpfUrl.split("/").pop()!,
+            url: cpfUrl,
+            tipoMime: "application/pdf",
+            dataUpload: new Date().toISOString(),
+          }
+        : null,
+
+      arquivoComprovanteResidencia: crUrl
+        ? {
+            nomeArquivo: crUrl.split("/").pop()!,
+            url: crUrl,
+            tipoMime: "application/pdf",
+            dataUpload: new Date().toISOString(),
+          }
+        : null,
+    };
+
+    // Envia para API
+    const resp = await fetch(
+      "https://peopleio-api-dev.azurewebsites.net/api/v1/colaboradores",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      }
+    );
+
+    if (!resp.ok) {
+      const txt = await resp.text();
+      throw new Error(`Erro ao enviar API: ${resp.status} ${txt}`);
+    }
+
+    const result = await resp.json();
+    console.log("Enviado com sucesso:", result);
+  }
 
   return (
     <div className="isolate bg-gray-900 px-6 py-24 sm:py-32 lg:px-8">
@@ -45,92 +140,58 @@ export const FormularioColaborador = () => {
           className="relative left-1/2 -z-10 aspect-1155/678 w-144.5 max-w-none -translate-x-1/2 rotate-30 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-20 sm:left-[calc(50%-40rem)] sm:w-288.75"
         ></div>
       </div>
+      {/* Título */}
       <div className="mx-auto max-w-2xl text-center">
-        <h2 className="text-4xl font-semibold tracking-tight text-balance text-white sm:text-5xl">
+        <h2 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
           Cadastro de Colaborador
         </h2>
-        <p className="mt-2 text-lg/8 text-gray-400">
+        <p className="mt-2 text-lg text-gray-400">
           Por favor, preencher o formulário corretamente.
         </p>
       </div>
-      <form className="mx-auto mt-16 max-w-xl sm:mt-20">
-        <div className="grid grid-cols-1 gap-x-8 gap-y-6 sm:grid-cols-2">
-          <div>
-            <label className="pio-label">Nome completo</label>
-            <input type="text" name="nome" className="pio-input" />
-          </div>
-          <div>
-            <label className="pio-label">CPF</label>
-            <input type="text" name="cpf" className="pio-input" />
-          </div>
-          <div>
-            <label className="pio-label">Data de Nascimento</label>
-            <DatePicker />
-          </div>
-          <div>
-            <label className="pio-label">Email</label>
-            <input type="email" name="email" className="pio-input" />
-          </div>
-          <div>
-            <label className="pio-label">Telefone</label>
-            <input type="text" 
-              name="telefone" 
-              className="pio-input"
-              value={telefone}
-              onChange={handleChange}
-              placeholder="(99) 99999-9999"
-            />
-          </div>
 
-          <div>
-            <label className="pio-label">RG</label>
-            <input type="text" name="rg" className="pio-input" />
-          </div>
-          <div>
-            <label className="pio-label">Órgão Emissor</label>
-            <input type="text" name="orgaoEmissor" className="pio-input" />
-          </div>
-          <div>
-            <label className="pio-label">UF</label>
-            <Select name="uf">
-              <SelectTrigger className="w-[180px]" >
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectLabel>Estados</SelectLabel>
-                  {estados.map((estado) => (
-                    <SelectItem key={estado.id} value={estado.name}>
-                      {estado.name}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <label className="pio-label">Data de Emissão</label>
-            <DatePicker />
-          </div>
-          <div>
-            <label className="pio-label">CEP</label>
-            <input type="text" 
-              name="cep" 
-              className="pio-input"
-              value={cep}
-              onChange={(e) => applyCEPMask(e.target.value)}
-              placeholder="00000-000"
-              />
+      {/* Formulário */}
+      <form
+        className="mx-auto mt-16 max-w-3xl space-y-12 sm:mt-20"
+        onSubmit={handleSubmit(onSubmit)}
+      >
+        {/* Dados pessoais */}
+        <section className="bg-gray-800/50 p-6 rounded-2xl shadow-xl">
+          <h3 className="text-xl font-semibold text-white mb-6">
+            Dados Pessoais
+          </h3>
+          <DadosPessoaisForm
+            register={register}
+            control={control}
+            errors={errors}
+          />
+        </section>
 
-          </div>
+        {/* Endereço */}
+        <section className="bg-gray-800/50 p-6 rounded-2xl shadow-xl">
+          <h3 className="text-xl font-semibold text-white mb-6">Endereço</h3>
+          <EnderecoForm
+            register={register}
+            control={control}
+            setValue={setValue}
+            errors={errors}
+          />
+        </section>
 
-        </div>
+        {/* Documentos */}
+        <section className="bg-gray-800/50 p-6 rounded-2xl shadow-xl">
+          <h3 className="text-xl font-semibold text-white mb-6">Documentos</h3>
+          <DocumentosForm
+            register={register}
+            control={control}
+            setValue={setValue}
+            errors={errors}
+          />
+        </section>
 
-        <div className="mt-10">
-          <button type="submit" className="pio-btn-primary">
-            Salvar
-          </button>
-        </div>
+        <button type="submit" className="pio-btn-primary w-full text-lg">
+          Salvar
+        </button>
       </form>
     </div>
   );

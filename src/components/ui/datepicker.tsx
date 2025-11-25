@@ -11,7 +11,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover"
 
-export function DatePicker() {
+interface DatePickerProps {
+  value?: Date
+  onChange?: (date: Date | undefined) => void
+}
+
+export function DatePicker({ value, onChange }: DatePickerProps) {
   const [open, setOpen] = React.useState(false)
   const [date, setDate] = React.useState<Date | undefined>(undefined)
 
@@ -20,10 +25,10 @@ export function DatePicker() {
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button    //Removed Button component to use custom styling
-            id="date"
+
             className="pio-input-date"
           >
-            {date ? date.toLocaleDateString() : "Selecione a data"}
+            {value ? value.toLocaleDateString() : "Selecione a data"}
             <ChevronDownIcon />
           </button>
         </PopoverTrigger>
@@ -33,6 +38,7 @@ export function DatePicker() {
             selected={date}
             captionLayout="dropdown"
             onSelect={(date) => {
+              onChange?.(date)
               setDate(date)
               setOpen(false)
             }}
