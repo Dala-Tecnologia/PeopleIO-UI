@@ -5,18 +5,18 @@ import type {
   FieldErrors,
 } from "react-hook-form";
 import { Controller } from "react-hook-form";
-import type { FormData } from "@/types/FormData";
+import type {  FormDataInput } from "@/types/FormData";
 import { DatePicker } from "@/components/ui/datepicker";
 import { FileUpload } from "@/components/FileUpload";
 
-type Props = {
-  register: UseFormRegister<FormData>;
-  control: Control<FormData>;
-  setValue: UseFormSetValue<FormData>;
-  errors: FieldErrors<FormData>;
-};
+interface DocumentosFormProps {
+  register: UseFormRegister<FormDataInput>;
+  control: Control<FormDataInput>;
+  setValue: UseFormSetValue<FormDataInput>;
+  errors: FieldErrors<FormDataInput>;
+}
 
-export const DocumentosForm = ({ register, control, setValue }: Props) => {
+export const DocumentosForm = ({ register, control, setValue }: DocumentosFormProps) => {
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
       <div>

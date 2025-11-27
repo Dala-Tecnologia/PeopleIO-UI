@@ -1,5 +1,5 @@
 import type { Control, UseFormRegister, FieldErrors } from "react-hook-form";
-import type { FormData } from "@/types/FormData";
+import type { FormData, FormDataInput } from "@/types/FormData";
 import { insertMaskInCPF } from "@/functions/cpf";
 import { insertMaskInPhone } from "@/functions/phone";
 import { InputField } from "../ui/InputField";
@@ -11,13 +11,14 @@ import {
 } from "@/constrants/options";
 import { DateField } from "../ui/date-field";
 
-type Props = {
-  register: UseFormRegister<FormData>;
-  control: Control<FormData>;
-  errors: FieldErrors<FormData>;
-};
+interface DadosPessoaisFormProps {
+  register: UseFormRegister<FormDataInput>;
+  control: Control<FormDataInput>;
+  errors: FieldErrors<FormDataInput>;
+}
 
-export const DadosPessoaisForm = ({ register, control, errors }: Props) => {
+
+export const DadosPessoaisForm = ({ register, control, errors }: DadosPessoaisFormProps) => {
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
       <InputField
@@ -51,7 +52,7 @@ export const DadosPessoaisForm = ({ register, control, errors }: Props) => {
         error={errors.telefone}
       />
 
-      <SelectField<FormData>
+      <SelectField<FormDataInput>
         control={control}
         name="sexo"
         label="Sexo"

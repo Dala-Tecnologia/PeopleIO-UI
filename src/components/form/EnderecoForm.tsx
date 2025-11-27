@@ -1,16 +1,16 @@
 import type { Control, UseFormRegister, UseFormSetValue, FieldErrors } from "react-hook-form";
-import type { FormData } from "@/types/FormData";
+import type { FormData, FormDataInput } from "@/types/FormData";
 import { insertMaskInCEP } from "@/functions/cep";
 import { useState } from "react";
 
-type Props = {
-  register: UseFormRegister<FormData>;
-  control: Control<FormData>;
-  setValue: UseFormSetValue<FormData>;
-  errors: FieldErrors<FormData>;
-};
+interface EnderecoFormProps {
+  register: UseFormRegister<FormDataInput>;
+  control: Control<FormDataInput>;
+  setValue: UseFormSetValue<FormDataInput>;
+  errors: FieldErrors<FormDataInput>;
+}
 
-export const EnderecoForm = ({ register, setValue, errors }: Props) => {
+export const EnderecoForm = ({ register, setValue, errors }: EnderecoFormProps) => {
   const [loadingCep, setLoadingCep] = useState(false);
 
   async function buscarCEP(cep: string) {

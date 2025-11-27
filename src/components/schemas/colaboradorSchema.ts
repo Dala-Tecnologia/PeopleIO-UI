@@ -1,12 +1,7 @@
 import { z } from "zod";
 
-export const arquivoSchema = z.object({
-  file: z.instanceof(File),
-  nomeArquivo: z.string().optional(),
-  url: z.string().optional(),
-  dataUpload: z.string().optional(),
-  tipoMime: z.string().optional(),
-});
+// Schema para validação durante edição (aceita File)
+export const arquivoSchema = z.instanceof(File).nullable();
 
 export const enderecoSchema = z.object({
   rua: z.string().min(1, { message: "O campo Rua é obrigatório." }),
@@ -16,29 +11,47 @@ export const enderecoSchema = z.object({
   estado: z.string().min(1, { message: "O campo Estado é obrigatório." }),
   cep: z
     .string()
-    .min(8, { message: "O campo CEP deve conter no mínimo 8 dígitos." }),
+    .min(8, { message: "CEP deve ter ao menos 8 caracteres." })
+    .max(9, { message: "CEP inválido." }) // com máscara
+    .transform((v) => v.replace(/\D/g, ""))
+    .refine((v) => v.length === 8, {
+      message: "CEP deve conter 8 dígitos numéricos.",
+    }),
 });
 
 export const colaboradorSchema = z.object({
   nome: z.string().min(3, {
     message: "O campo Nome completo deve ter pelo menos 3 caracteres.",
   }),
-  cpf: z.string().min(11, { message: "O campo CPF deve ter 11 dígitos." }),
+  cpf: z
+    .string()
+    .min(11, { message: "CPF deve ter ao menos 11 caracteres." })
+    .max(14, { message: "CPF inválido." }) // com máscara
+    .transform((v) => v.replace(/\D/g, "")) // remove tudo que não é número
+    .refine((v) => v.length === 11, {
+      message: "CPF deve conter 11 dígitos numéricos.",
+    }),
+
+  telefone: z
+  .string()
+  .min(10, { message: "Telefone inválido." })
+  .max(15) // máscara
+  .transform((v) => v.replace(/\D/g, ""))
+  .refine((v) => v.length >= 10 && v.length <= 11, {
+    message: "Telefone deve ter 10 ou 11 dígitos.",
+  }),
+
   dataNascimento: z
     .string()
     .min(1, { message: "O campo Data de Nascimento é obrigatório." }),
 
   email: z.string().email({ message: "Informe um e-mail válido." }),
 
-  telefone: z
-    .string()
-    .min(10, { message: "O campo Telefone deve ter no mínimo 10 dígitos." }),
-
   endereco: enderecoSchema,
 
-  cargo: z.string().nullable(),
-  departamento: z.string().nullable(),
-  dataAdmissao: z.string().nullable(),
+  // cargo: z.string().nullable(),
+  // departamento: z.string().nullable(),
+  // dataAdmissao: z.string().nullable(),
 
   identidadeNumero: z.string(),
   identidadeOrgaoEmissor: z.string(),
@@ -54,9 +67,9 @@ export const colaboradorSchema = z.object({
   ctpsDataEmissao: z
     .string()
     .min(1, { message: "O campo Data de Emissão da CTPS é obrigatório." }),
-  ctpsuf: z.string().min(2, { message: "O campo UF da CTPS é obrigatório." }),
+  //ctpsuf: z.string().min(2, { message: "O campo UF da CTPS é obrigatório." }),
 
-  tituloEleitor: z
+  /* tituloEleitor: z
     .string()
     .min(1, { message: "O campo Título de Eleitor é obrigatório." }),
   tituloDataEmissao: z
@@ -70,9 +83,9 @@ export const colaboradorSchema = z.object({
     .min(1, { message: "O campo Zona Eleitoral é obrigatório." }),
   tituloSecao: z
     .string()
-    .min(1, { message: "O campo Seção Eleitoral é obrigatório." }),
+    .min(1, { message: "O campo Seção Eleitoral é obrigatório." }), */
 
-  cnhNumero: z
+  /* cnhNumero: z
     .string()
     .min(1, { message: "O campo Número da CNH é obrigatório." }),
   cnhuf: z.string().min(2, { message: "O campo UF da CNH é obrigatório." }),
@@ -82,9 +95,9 @@ export const colaboradorSchema = z.object({
   cnhOrgaoEmissor: z
     .string()
     .min(1, { message: "O campo Órgão Emissor da CNH é obrigatório." }),
-  cnhTipo: z.string().min(1, { message: "O campo Tipo de CNH é obrigatório." }),
+  cnhTipo: z.string().min(1, { message: "O campo Tipo de CNH é obrigatório." }), */
 
-  corRaca: z.string().min(1, { message: "O campo Cor/Raça é obrigatório." }),
+  //corRaca: z.string().min(1, { message: "O campo Cor/Raça é obrigatório." }),
   sexo: z.string().min(1, { message: "O campo Sexo é obrigatório." }),
   escolaridade: z
     .string()
@@ -104,8 +117,8 @@ export const colaboradorSchema = z.object({
     .regex(/^[A-Za-zÀ-ú\s]+$/, {
       message: "Nacionalidade deve conter apenas letras.",
     }),
-  arquivoRG: arquivoSchema.nullable(),
-  arquivoCNH: arquivoSchema.nullable(),
-  arquivoCPF: arquivoSchema.nullable(),
-  arquivoComprovanteResidencia: arquivoSchema.nullable(),
+  arquivoRG: arquivoSchema,
+  arquivoCNH: arquivoSchema,
+  arquivoCPF: arquivoSchema,
+  arquivoComprovanteResidencia: arquivoSchema,
 });

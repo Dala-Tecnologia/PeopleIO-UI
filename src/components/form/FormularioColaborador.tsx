@@ -2,11 +2,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { colaboradorSchema } from "@/components/schemas/colaboradorSchema";
 
-import type { FormData } from "@/types/FormData";
+import type { FormData, FormDataInput } from "@/types/FormData";
 
 import { DadosPessoaisForm } from "./DadosPessoaisForm";
 import { DocumentosForm } from "./DocumentosForm";
 import { EnderecoForm } from "./EnderecoForm";
+
 
 export const FormularioColaborador = () => {
   const {
@@ -15,7 +16,7 @@ export const FormularioColaborador = () => {
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm<FormDataInput>({
     resolver: zodResolver(colaboradorSchema),
     mode: "onChange",
     defaultValues: {
@@ -27,12 +28,18 @@ export const FormularioColaborador = () => {
   });
 
   async function uploadToBlob(file: File, filename: string) {
-    const sasToken = "SEU_SAS_AQUI";
-    const containerUrl = `https://peopleiostoragedatadev.blob.core.windows.net/documents`;
+    const sasToken = import.meta.env.VITE_AZURE_SAS_TOKEN;
+    const containerUrl = import.meta.env.VITE_AZURE_BLOB_URL;
+
+    if (!sasToken || !containerUrl) {
+      throw new Error(
+        "Variáveis de ambiente VITE_AZURE_SAS_TOKEN e VITE_AZURE_BLOB_URL não configuradas"
+      );
+    }
 
     const url = `${containerUrl}/${filename}?${sasToken}`;
 
-    await fetch(url, {
+    const response = await fetch(url, {
       method: "PUT",
       headers: {
         "x-ms-blob-type": "BlockBlob",
@@ -41,10 +48,20 @@ export const FormularioColaborador = () => {
       body: file,
     });
 
+    if (!response.ok) {
+      throw new Error(
+        `Erro ao fazer upload: ${response.status} ${response.statusText}`
+      );
+    }
+
     return `${containerUrl}/${filename}`;
   }
 
-  async function processFile(file: File, prefix: string, nome: string) {
+  async function processFile(
+    file: File | null,
+    prefix: string,
+    nome: string
+  ) {
     if (!file) return null;
 
     const extension = file.name.split(".").pop();
@@ -53,85 +70,78 @@ export const FormularioColaborador = () => {
     return await uploadToBlob(file, filename);
   }
 
-  async function onSubmit(data: FormData) {
-    const rgUrl = data.arquivoRG
-      ? await processFile(data.arquivoRG.file, "RG", data.nome)
-      : null;
+  async function onSubmit(data: FormDataInput) {
+    try {
+      const rgUrl = await processFile(data.arquivoRG, "RG", data.nome);
+      const cnhUrl = await processFile(data.arquivoCNH, "CNH", data.nome);
+      const cpfUrl = await processFile(data.arquivoCPF, "CPF", data.nome);
+      const crUrl = await processFile(
+        data.arquivoComprovanteResidencia,
+        "CR",
+        data.nome
+      );
 
-    const cnhUrl = data.arquivoCNH
-      ? await processFile(data.arquivoCNH.file, "CNH", data.nome)
-      : null;
+      // Converte para FormData com Arquivo objects
+      const payload: FormData = {
+        ...data,
+        arquivoRG: rgUrl
+          ? {
+              nomeArquivo: rgUrl.split("/").pop()!,
+              url: rgUrl,
+              tipoMime: data.arquivoRG!.type,
+              dataUpload: new Date().toISOString(),
+            }
+          : null,
+        arquivoCNH: cnhUrl
+          ? {
+              nomeArquivo: cnhUrl.split("/").pop()!,
+              url: cnhUrl,
+              tipoMime: data.arquivoCNH!.type,
+              dataUpload: new Date().toISOString(),
+            }
+          : null,
+        arquivoCPF: cpfUrl
+          ? {
+              nomeArquivo: cpfUrl.split("/").pop()!,
+              url: cpfUrl,
+              tipoMime: data.arquivoCPF!.type,
+              dataUpload: new Date().toISOString(),
+            }
+          : null,
+        arquivoComprovanteResidencia: crUrl
+          ? {
+              nomeArquivo: crUrl.split("/").pop()!,
+              url: crUrl,
+              tipoMime: data.arquivoComprovanteResidencia!.type,
+              dataUpload: new Date().toISOString(),
+            }
+          : null,
+      };
 
-    const cpfUrl = data.arquivoCPF
-      ? await processFile(data.arquivoCPF.file, "CPF", data.nome)
-      : null;
+      // Envia para API
+      const resp = await fetch(
+        "https://peopleio-api-dev.azurewebsites.net/api/v1/colaboradores",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
-    const crUrl = data.arquivoComprovanteResidencia
-      ? await processFile(
-          data.arquivoComprovanteResidencia.file,
-          "CR",
-          data.nome
-        )
-      : null;
-
-    const payload = {
-      ...data,
-
-      arquivoRG: rgUrl
-        ? {
-            nomeArquivo: rgUrl.split("/").pop()!,
-            url: rgUrl,
-            tipoMime: "application/pdf",
-            dataUpload: new Date().toISOString(),
-          }
-        : null,
-
-      arquivoCNH: cnhUrl
-        ? {
-            nomeArquivo: cnhUrl.split("/").pop()!,
-            url: cnhUrl,
-            tipoMime: "application/pdf",
-            dataUpload: new Date().toISOString(),
-          }
-        : null,
-
-      arquivoCPF: cpfUrl
-        ? {
-            nomeArquivo: cpfUrl.split("/").pop()!,
-            url: cpfUrl,
-            tipoMime: "application/pdf",
-            dataUpload: new Date().toISOString(),
-          }
-        : null,
-
-      arquivoComprovanteResidencia: crUrl
-        ? {
-            nomeArquivo: crUrl.split("/").pop()!,
-            url: crUrl,
-            tipoMime: "application/pdf",
-            dataUpload: new Date().toISOString(),
-          }
-        : null,
-    };
-
-    // Envia para API
-    const resp = await fetch(
-      "https://peopleio-api-dev.azurewebsites.net/api/v1/colaboradores",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+      if (!resp.ok) {
+        const txt = await resp.text();
+        throw new Error(`Erro ao enviar API: ${resp.status} ${txt}`);
       }
-    );
 
-    if (!resp.ok) {
-      const txt = await resp.text();
-      throw new Error(`Erro ao enviar API: ${resp.status} ${txt}`);
+      const result = await resp.json();
+      console.log("Enviado com sucesso:", result);
+    } catch (error) {
+      console.error("Erro na submissão do formulário:", error);
+      throw error;
     }
-
-    const result = await resp.json();
-    console.log("Enviado com sucesso:", result);
   }
+
+  console.log("errors", errors);
 
   return (
     <div className="isolate bg-gray-900 px-6 py-24 sm:py-32 lg:px-8">
@@ -147,7 +157,7 @@ export const FormularioColaborador = () => {
           className="relative left-1/2 -z-10 aspect-1155/678 w-144.5 max-w-none -translate-x-1/2 rotate-30 bg-linear-to-tr from-[#ff80b5] to-[#9089fc] opacity-20 sm:left-[calc(50%-40rem)] sm:w-288.75"
         ></div>
       </div>
-      {/* Título */}
+
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
           Cadastro de Colaborador
@@ -157,12 +167,10 @@ export const FormularioColaborador = () => {
         </p>
       </div>
 
-      {/* Formulário */}
       <form
         className="mx-auto mt-16 max-w-3xl space-y-12 sm:mt-20"
         onSubmit={handleSubmit(onSubmit)}
       >
-        {/* Dados pessoais */}
         <section className="bg-gray-800/50 p-6 rounded-2xl shadow-xl">
           <h3 className="text-xl font-semibold text-white mb-6">
             Dados Pessoais
@@ -174,7 +182,6 @@ export const FormularioColaborador = () => {
           />
         </section>
 
-        {/* Endereço */}
         <section className="bg-gray-800/50 p-6 rounded-2xl shadow-xl">
           <h3 className="text-xl font-semibold text-white mb-6">Endereço</h3>
           <EnderecoForm
@@ -185,7 +192,6 @@ export const FormularioColaborador = () => {
           />
         </section>
 
-        {/* Documentos */}
         <section className="bg-gray-800/50 p-6 rounded-2xl shadow-xl">
           <h3 className="text-xl font-semibold text-white mb-6">Documentos</h3>
           <DocumentosForm
