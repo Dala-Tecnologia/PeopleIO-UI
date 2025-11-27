@@ -10,7 +10,7 @@ type Props = {
   errors: FieldErrors<FormData>;
 };
 
-export const EnderecoForm = ({ register, setValue }: Props) => {
+export const EnderecoForm = ({ register, setValue, errors }: Props) => {
   const [loadingCep, setLoadingCep] = useState(false);
 
   async function buscarCEP(cep: string) {
@@ -20,21 +20,27 @@ export const EnderecoForm = ({ register, setValue }: Props) => {
 
     try {
       setLoadingCep(true);
+
       const response = await fetch(`https://viacep.com.br/ws/${cleanCep}/json/`);
       const data = await response.json();
 
       if (data.erro) return;
 
-      // Preenche automaticamente os campos
-      setValue("endereco.rua", data.logradouro || "");
-      setValue("endereco.bairro", data.bairro || "");
-      setValue("endereco.cidade", data.localidade || "");
-      setValue("endereco.estado", data.uf || "");
+      // Preenche automaticamente os campos sem disparar validação
+      setValue("endereco.rua", data.logradouro || "", { shouldValidate: false });
+      setValue("endereco.bairro", data.bairro || "", { shouldValidate: false });
+      setValue("endereco.cidade", data.localidade || "", { shouldValidate: false });
+      setValue("endereco.estado", data.uf || "", { shouldValidate: false });
     } catch {
       console.error("Erro ao buscar CEP");
     } finally {
       setLoadingCep(false);
     }
+  }
+
+  function handleCepChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const masked = insertMaskInCEP(e.target.value);
+    setValue("endereco.cep", masked, { shouldValidate: true });
   }
 
   return (
@@ -45,9 +51,14 @@ export const EnderecoForm = ({ register, setValue }: Props) => {
           {...register("endereco.cep")}
           className="pio-input"
           placeholder="00000-000"
-          onChange={(e) => (e.target.value = insertMaskInCEP(e.target.value))}
+          onChange={handleCepChange}
           onBlur={(e) => buscarCEP(e.target.value)}
         />
+        {errors.endereco?.cep && (
+          <p className="text-sm text-red-400 mt-1">
+            {errors.endereco.cep.message}
+          </p>
+        )}
         {loadingCep && (
           <p className="text-sm text-blue-400 mt-1">Buscando CEP...</p>
         )}
