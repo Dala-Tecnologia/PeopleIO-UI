@@ -12,7 +12,7 @@ export const enderecoSchema = z.object({
   cep: z
     .string()
     .min(8, { message: "CEP deve ter ao menos 8 caracteres." })
-    .max(9, { message: "CEP inválido." }) // com máscara
+    .max(9, { message: "CEP inválido." })
     .transform((v) => v.replace(/\D/g, ""))
     .refine((v) => v.length === 8, {
       message: "CEP deve conter 8 dígitos numéricos.",
@@ -26,20 +26,20 @@ export const colaboradorSchema = z.object({
   cpf: z
     .string()
     .min(11, { message: "CPF deve ter ao menos 11 caracteres." })
-    .max(14, { message: "CPF inválido." }) // com máscara
-    .transform((v) => v.replace(/\D/g, "")) // remove tudo que não é número
+    .max(14, { message: "CPF inválido." })
+    .transform((v) => v.replace(/\D/g, ""))
     .refine((v) => v.length === 11, {
       message: "CPF deve conter 11 dígitos numéricos.",
     }),
 
   telefone: z
-  .string()
-  .min(10, { message: "Telefone inválido." })
-  .max(15) // máscara
-  .transform((v) => v.replace(/\D/g, ""))
-  .refine((v) => v.length >= 10 && v.length <= 11, {
-    message: "Telefone deve ter 10 ou 11 dígitos.",
-  }),
+    .string()
+    .min(10, { message: "Telefone inválido." })
+    .max(15)
+    .transform((v) => v.replace(/\D/g, ""))
+    .refine((v) => v.length >= 10 && v.length <= 11, {
+      message: "Telefone deve ter 10 ou 11 dígitos.",
+    }),
 
   dataNascimento: z
     .string()
@@ -49,9 +49,9 @@ export const colaboradorSchema = z.object({
 
   endereco: enderecoSchema,
 
-  // cargo: z.string().nullable(),
-  // departamento: z.string().nullable(),
-  // dataAdmissao: z.string().nullable(),
+  cargo: z.string().nullable(),
+  departamento: z.string().nullable(),
+  dataAdmissao: z.string().nullable(),
 
   identidadeNumero: z.string(),
   identidadeOrgaoEmissor: z.string(),
@@ -67,9 +67,9 @@ export const colaboradorSchema = z.object({
   ctpsDataEmissao: z
     .string()
     .min(1, { message: "O campo Data de Emissão da CTPS é obrigatório." }),
-  //ctpsuf: z.string().min(2, { message: "O campo UF da CTPS é obrigatório." }),
+  ctpsuf: z.string().min(2, { message: "O campo UF da CTPS é obrigatório." }),
 
-  /* tituloEleitor: z
+  tituloEleitor: z
     .string()
     .min(1, { message: "O campo Título de Eleitor é obrigatório." }),
   tituloDataEmissao: z
@@ -83,9 +83,9 @@ export const colaboradorSchema = z.object({
     .min(1, { message: "O campo Zona Eleitoral é obrigatório." }),
   tituloSecao: z
     .string()
-    .min(1, { message: "O campo Seção Eleitoral é obrigatório." }), */
+    .min(1, { message: "O campo Seção Eleitoral é obrigatório." }),
 
-  /* cnhNumero: z
+  cnhNumero: z
     .string()
     .min(1, { message: "O campo Número da CNH é obrigatório." }),
   cnhuf: z.string().min(2, { message: "O campo UF da CNH é obrigatório." }),
@@ -95,9 +95,9 @@ export const colaboradorSchema = z.object({
   cnhOrgaoEmissor: z
     .string()
     .min(1, { message: "O campo Órgão Emissor da CNH é obrigatório." }),
-  cnhTipo: z.string().min(1, { message: "O campo Tipo de CNH é obrigatório." }), */
+  cnhTipo: z.string().min(1, { message: "O campo Tipo de CNH é obrigatório." }),
 
-  //corRaca: z.string().min(1, { message: "O campo Cor/Raça é obrigatório." }),
+  corRaca: z.string().min(1, { message: "O campo Cor/Raça é obrigatório." }),
   sexo: z.string().min(1, { message: "O campo Sexo é obrigatório." }),
   escolaridade: z
     .string()

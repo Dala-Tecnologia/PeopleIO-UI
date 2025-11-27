@@ -1,5 +1,5 @@
 import type { Control, UseFormRegister, UseFormSetValue, FieldErrors } from "react-hook-form";
-import type { FormData, FormDataInput } from "@/types/FormData";
+import type { FormDataInput } from "@/types/FormData";
 import { insertMaskInCEP } from "@/functions/cep";
 import { useState } from "react";
 

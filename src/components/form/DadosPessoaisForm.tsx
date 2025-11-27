@@ -1,5 +1,5 @@
 import type { Control, UseFormRegister, FieldErrors } from "react-hook-form";
-import type { FormData, FormDataInput } from "@/types/FormData";
+import type { FormDataInput } from "@/types/FormData";
 import { insertMaskInCPF } from "@/functions/cpf";
 import { insertMaskInPhone } from "@/functions/phone";
 import { InputField } from "../ui/InputField";

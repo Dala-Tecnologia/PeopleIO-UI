@@ -77,14 +77,6 @@ export const DocumentosForm = ({ register, control, setValue }: DocumentosFormPr
           setValue(
             "arquivoRG",
             file
-              ? {
-                  file,
-                  nomeArquivo: file.name,
-                  tipoMime: file.type,
-                  url: URL.createObjectURL(file),
-                  dataUpload: new Date().toISOString(),
-                }
-              : null
           )
         }
       />
@@ -95,14 +87,6 @@ export const DocumentosForm = ({ register, control, setValue }: DocumentosFormPr
           setValue(
             "arquivoCNH",
             file
-              ? {
-                  file,
-                  nomeArquivo: file.name,
-                  tipoMime: file.type,
-                  url: URL.createObjectURL(file),
-                  dataUpload: new Date().toISOString(),
-                }
-              : null
           )
         }
       />
@@ -113,14 +97,6 @@ export const DocumentosForm = ({ register, control, setValue }: DocumentosFormPr
           setValue(
             "arquivoCPF",
             file
-              ? {
-                file,
-                  nomeArquivo: file.name,
-                  tipoMime: file.type,
-                  url: URL.createObjectURL(file),
-                  dataUpload: new Date().toISOString(),
-                }
-              : null
           )
         }
       />
@@ -131,14 +107,6 @@ export const DocumentosForm = ({ register, control, setValue }: DocumentosFormPr
           setValue(
             "arquivoComprovanteResidencia",
             file
-              ? {
-                file,
-                  nomeArquivo: file.name,
-                  tipoMime: file.type,
-                  url: URL.createObjectURL(file),
-                  dataUpload: new Date().toISOString(),
-                }
-              : null
           )
         }
       />
