@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { colaboradorSchema } from "@/components/schemas/colaboradorSchema";
 
-import type { ArquivoForm, FormData } from "@/types/FormData";
+import type { FormData } from "@/types/FormData";
 
 import { DadosPessoaisForm } from "./DadosPessoaisForm";
 import { DocumentosForm } from "./DocumentosForm";
@@ -18,11 +18,14 @@ export const FormularioColaborador = () => {
   } = useForm<FormData>({
     resolver: zodResolver(colaboradorSchema),
     mode: "onChange",
+    defaultValues: {
+      arquivoRG: null,
+      arquivoCNH: null,
+      arquivoCPF: null,
+      arquivoComprovanteResidencia: null,
+    },
   });
 
-  /** -----------------------------------------
-   *  Upload para Azure Blob
-   *  ------------------------------------------*/
   async function uploadToBlob(file: File, filename: string) {
     const sasToken = "SEU_SAS_AQUI";
     const containerUrl = `https://peopleiostoragedatadev.blob.core.windows.net/documents`;
@@ -41,32 +44,36 @@ export const FormularioColaborador = () => {
     return `${containerUrl}/${filename}`;
   }
 
-  /** -----------------------------------------
-   *  Resolve um único campo File
-   *  ------------------------------------------*/
-  async function processFile(file: ArquivoForm, prefix: string, nome: string) {
+  async function processFile(file: File, prefix: string, nome: string) {
     if (!file) return null;
 
-    // aqui sempre será File | null
-    const filename = `${prefix}-${crypto.randomUUID()}-${nome}.pdf`;
+    const extension = file.name.split(".").pop();
+    const filename = `${prefix}-${crypto.randomUUID()}-${nome}.${extension}`;
+
     return await uploadToBlob(file, filename);
   }
 
-  /** -----------------------------------------
-   *  SUBMIT
-   *  ------------------------------------------*/
   async function onSubmit(data: FormData) {
-    // Faz uploads
-    const rgUrl = await processFile(data.arquivoRG, "RG", data.nome);
-    const cnhUrl = await processFile(data.arquivoCNH, "CNH", data.nome);
-    const cpfUrl = await processFile(data.arquivoCPF, "CPF", data.nome);
-    const crUrl = await processFile(
-      data.arquivoComprovanteResidencia,
-      "CR",
-      data.nome
-    );
+    const rgUrl = data.arquivoRG
+      ? await processFile(data.arquivoRG.file, "RG", data.nome)
+      : null;
 
-    /** Monta payload final com tipo Arquivo (esperado pela API) */
+    const cnhUrl = data.arquivoCNH
+      ? await processFile(data.arquivoCNH.file, "CNH", data.nome)
+      : null;
+
+    const cpfUrl = data.arquivoCPF
+      ? await processFile(data.arquivoCPF.file, "CPF", data.nome)
+      : null;
+
+    const crUrl = data.arquivoComprovanteResidencia
+      ? await processFile(
+          data.arquivoComprovanteResidencia.file,
+          "CR",
+          data.nome
+        )
+      : null;
+
     const payload = {
       ...data,
 

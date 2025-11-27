@@ -1,4 +1,9 @@
-import type { Control, UseFormRegister, UseFormSetValue, FieldErrors  } from "react-hook-form";
+import type {
+  Control,
+  UseFormRegister,
+  UseFormSetValue,
+  FieldErrors,
+} from "react-hook-form";
 import { Controller } from "react-hook-form";
 import type { FormData } from "@/types/FormData";
 import { DatePicker } from "@/components/ui/datepicker";
@@ -69,45 +74,73 @@ export const DocumentosForm = ({ register, control, setValue }: Props) => {
       <FileUpload
         label="RG (PDF/Imagem)"
         onSelected={(file) =>
-            setValue("arquivoRG", file ? {
-            nomeArquivo: file.name,
-            tipoMime: file.type,
-            url: URL.createObjectURL(file),
-            dataUpload: new Date().toISOString(),
-            } : {})}
+          setValue(
+            "arquivoRG",
+            file
+              ? {
+                  file,
+                  nomeArquivo: file.name,
+                  tipoMime: file.type,
+                  url: URL.createObjectURL(file),
+                  dataUpload: new Date().toISOString(),
+                }
+              : null
+          )
+        }
       />
 
       <FileUpload
         label="CNH"
         onSelected={(file) =>
-            setValue("arquivoCNH", file ? {
-            nomeArquivo: file.name,
-            tipoMime: file.type,
-            url: URL.createObjectURL(file),
-            dataUpload: new Date().toISOString(),
-            } : {})}
+          setValue(
+            "arquivoCNH",
+            file
+              ? {
+                  file,
+                  nomeArquivo: file.name,
+                  tipoMime: file.type,
+                  url: URL.createObjectURL(file),
+                  dataUpload: new Date().toISOString(),
+                }
+              : null
+          )
+        }
       />
 
       <FileUpload
         label="CPF"
         onSelected={(file) =>
-            setValue("arquivoCPF", file ? {
-            nomeArquivo: file.name,
-            tipoMime: file.type,
-            url: URL.createObjectURL(file),
-            dataUpload: new Date().toISOString(),
-            } : {})}
+          setValue(
+            "arquivoCPF",
+            file
+              ? {
+                file,
+                  nomeArquivo: file.name,
+                  tipoMime: file.type,
+                  url: URL.createObjectURL(file),
+                  dataUpload: new Date().toISOString(),
+                }
+              : null
+          )
+        }
       />
 
       <FileUpload
         label="Comprovante de Residência"
         onSelected={(file) =>
-            setValue("arquivoComprovanteResidencia", file ? {
-            nomeArquivo: file.name,
-            tipoMime: file.type,
-            url: URL.createObjectURL(file),
-            dataUpload: new Date().toISOString(),
-            } : {})}
+          setValue(
+            "arquivoComprovanteResidencia",
+            file
+              ? {
+                file,
+                  nomeArquivo: file.name,
+                  tipoMime: file.type,
+                  url: URL.createObjectURL(file),
+                  dataUpload: new Date().toISOString(),
+                }
+              : null
+          )
+        }
       />
     </div>
   );

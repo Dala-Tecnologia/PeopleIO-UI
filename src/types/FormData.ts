@@ -1,10 +1,11 @@
-export type ArquivoForm = File | null;
+export type ArquivoForm = Arquivo | null;
 
 export type Arquivo = {
-	nomeArquivo?: string;
-	url?: string;
-	dataUpload?: string;
-	tipoMime?: string;
+  file: File;
+  nomeArquivo?: string;
+  url?: string;
+  dataUpload?: string;
+  tipoMime?: string;
 };
 
 export type Endereco = {
@@ -21,7 +22,7 @@ export type FormData = {
   cpf: string;
   dataNascimento: string;
   email: string;
-  telefone: string | null;
+  telefone: string;
 
   endereco: Endereco;
 
@@ -58,8 +59,8 @@ export type FormData = {
   naturalidade: string;
   nacionalidade: string;
 
-  arquivoRG: ArquivoForm;
-  arquivoCNH: ArquivoForm;
-  arquivoCPF: ArquivoForm;
-  arquivoComprovanteResidencia: ArquivoForm;
+  arquivoRG: Arquivo | null;
+  arquivoCNH: Arquivo | null;
+  arquivoCPF: Arquivo | null;
+  arquivoComprovanteResidencia: Arquivo | null;
 };

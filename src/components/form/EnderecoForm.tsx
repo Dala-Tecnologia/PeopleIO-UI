@@ -39,7 +39,6 @@ export const EnderecoForm = ({ register, setValue }: Props) => {
 
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-      {/* CEP */}
       <div>
         <label className="pio-label">CEP</label>
         <input
@@ -54,31 +53,26 @@ export const EnderecoForm = ({ register, setValue }: Props) => {
         )}
       </div>
 
-      {/* Rua */}
       <div>
         <label className="pio-label">Rua</label>
         <input {...register("endereco.rua")} className="pio-input" />
       </div>
 
-      {/* Número */}
       <div>
         <label className="pio-label">Número</label>
         <input {...register("endereco.numero")} className="pio-input" />
       </div>
 
-      {/* Bairro */}
       <div>
         <label className="pio-label">Bairro</label>
         <input {...register("endereco.bairro")} className="pio-input" />
       </div>
 
-      {/* Cidade */}
       <div>
         <label className="pio-label">Cidade</label>
         <input {...register("endereco.cidade")} className="pio-input" />
       </div>
 
-      {/* Estado */}
       <div>
         <label className="pio-label">Estado</label>
         <input {...register("endereco.estado")} className="pio-input" />
