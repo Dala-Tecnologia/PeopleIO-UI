@@ -5,7 +5,6 @@ import type {
   FieldErrors,
 } from "react-hook-form";
 import type { FormDataInput } from "@/types/FormData";
-import { FileUpload } from "@/components/FileUpload";
 import { estadosOptions } from "@/constrants/options";
 import { SelectField } from "../ui/select-field";
 import { DateField } from "../ui/date-field";
@@ -18,7 +17,7 @@ interface DocumentosFormProps {
   errors: FieldErrors<FormDataInput>;
 }
 
-export const DocumentosForm = ({ register, control, setValue, errors }: DocumentosFormProps) => {
+export const DocumentosForm = ({ register, control, errors }: DocumentosFormProps) => {
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
       <InputField
