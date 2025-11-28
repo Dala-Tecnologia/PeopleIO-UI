@@ -7,6 +7,7 @@ import type { FormData, FormDataInput } from "@/types/FormData";
 import { DadosPessoaisForm } from "./DadosPessoaisForm";
 import { DocumentosForm } from "./DocumentosForm";
 import { EnderecoForm } from "./EnderecoForm";
+import { DocumentosOpcionaisForm } from "./DocumentosOpcionaisForm";
 
 
 export const FormularioColaborador = () => {
@@ -193,8 +194,18 @@ export const FormularioColaborador = () => {
         </section>
 
         <section className="bg-gray-800/50 p-6 rounded-2xl shadow-xl">
-          <h3 className="text-xl font-semibold text-white mb-6">Documentos</h3>
+          <h3 className="text-xl font-semibold text-white mb-6">Documentação</h3>
           <DocumentosForm
+            register={register}
+            control={control}
+            setValue={setValue}
+            errors={errors}
+          />
+        </section>
+
+        <section className="bg-gray-800/50 p-6 rounded-2xl shadow-xl">
+          <h3 className="text-xl font-semibold text-white mb-6">Documentação extra</h3>
+          <DocumentosOpcionaisForm
             register={register}
             control={control}
             setValue={setValue}

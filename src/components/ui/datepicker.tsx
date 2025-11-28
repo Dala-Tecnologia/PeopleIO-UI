@@ -24,7 +24,7 @@ export function DatePicker({ value, onChange }: DatePickerProps) {
     <div className="flex flex-col gap-3">
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <button    //Removed Button component to use custom styling
+          <button
 
             className="pio-input-date"
           >

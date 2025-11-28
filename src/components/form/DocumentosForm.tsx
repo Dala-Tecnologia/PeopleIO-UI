@@ -4,10 +4,12 @@ import type {
   UseFormSetValue,
   FieldErrors,
 } from "react-hook-form";
-import { Controller } from "react-hook-form";
-import type {  FormDataInput } from "@/types/FormData";
-import { DatePicker } from "@/components/ui/datepicker";
+import type { FormDataInput } from "@/types/FormData";
 import { FileUpload } from "@/components/FileUpload";
+import { estadosOptions } from "@/constrants/options";
+import { SelectField } from "../ui/select-field";
+import { DateField } from "../ui/date-field";
+import { InputField } from "../ui/InputField";
 
 interface DocumentosFormProps {
   register: UseFormRegister<FormDataInput>;
@@ -16,99 +18,60 @@ interface DocumentosFormProps {
   errors: FieldErrors<FormDataInput>;
 }
 
-export const DocumentosForm = ({ register, control, setValue }: DocumentosFormProps) => {
+export const DocumentosForm = ({ register, control, setValue, errors }: DocumentosFormProps) => {
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-      <div>
-        <label className="pio-label">RG</label>
-        <input {...register("identidadeNumero")} className="pio-input" />
-      </div>
-
-      <div>
-        <label className="pio-label">Órgão Emissor</label>
-        <input {...register("identidadeOrgaoEmissor")} className="pio-input" />
-      </div>
-
-      <div>
-        <label className="pio-label">UF do RG</label>
-        <input {...register("identidadeUF")} className="pio-input" />
-      </div>
-
-      <div>
-        <label className="pio-label">Data de Emissão</label>
-        <Controller
-          control={control}
-          name="identidadeDataEmissao"
-          render={({ field }) => (
-            <DatePicker
-              value={field.value ? new Date(field.value) : undefined}
-              onChange={(date) => field.onChange(date?.toISOString() ?? "")}
-            />
-          )}
-        />
-      </div>
-
-      <div>
-        <label className="pio-label">CTPS Número</label>
-        <input {...register("ctpsNumero")} className="pio-input" />
-      </div>
-
-      <div>
-        <label className="pio-label">CTPS Série</label>
-        <input {...register("ctpsSerie")} className="pio-input" />
-      </div>
-
-      <div>
-        <label className="pio-label">Data Emissão CTPS</label>
-        <Controller
-          control={control}
-          name="ctpsDataEmissao"
-          render={({ field }) => (
-            <DatePicker
-              value={field.value ? new Date(field.value) : undefined}
-              onChange={(date) => field.onChange(date?.toISOString() ?? "")}
-            />
-          )}
-        />
-      </div>
-      <FileUpload
-        label="RG (PDF/Imagem)"
-        onSelected={(file) =>
-          setValue(
-            "arquivoRG",
-            file
-          )
-        }
+      <InputField
+        label="RG - Número"
+        {...register("identidadeNumero")}
+        error={errors.identidadeNumero}
+      />
+      <InputField
+        label="RG - Órgão Emissor"
+        {...register("identidadeOrgaoEmissor")}
+        error={errors.identidadeOrgaoEmissor}
       />
 
-      <FileUpload
-        label="CNH"
-        onSelected={(file) =>
-          setValue(
-            "arquivoCNH",
-            file
-          )
-        }
+      <SelectField<FormDataInput>
+        control={control}
+        {...register("identidadeUF")}
+        name="identidadeUF"
+        label="RG - UF"
+        options={estadosOptions}
       />
 
-      <FileUpload
-        label="CPF"
-        onSelected={(file) =>
-          setValue(
-            "arquivoCPF",
-            file
-          )
-        }
+      <DateField
+        control={control}
+        name="identidadeDataEmissao"
+        label="RG - Data de Emissão"
+        error={errors.identidadeDataEmissao}
       />
 
-      <FileUpload
-        label="Comprovante de Residência"
-        onSelected={(file) =>
-          setValue(
-            "arquivoComprovanteResidencia",
-            file
-          )
-        }
+      <InputField
+        label="CTPS - Número"
+        {...register("ctpsNumero")}
+        error={errors.ctpsNumero}
+      />
+
+      <InputField
+        label="CTPS - Série"
+        {...register("ctpsSerie")}
+        error={errors.ctpsSerie}
+      />
+
+      <DateField
+        control={control}
+        name="ctpsDataEmissao"
+        label="CTPS - Data de Emissão "
+        error={errors.ctpsDataEmissao}
+      />
+
+      <SelectField<FormDataInput>
+        control={control}
+        {...register("ctpsuf")}
+        name="ctpsuf"
+        label="CTPS UF"
+        options={estadosOptions}
       />
     </div>
   );

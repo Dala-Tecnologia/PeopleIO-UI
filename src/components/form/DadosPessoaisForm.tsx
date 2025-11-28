@@ -5,6 +5,7 @@ import { insertMaskInPhone } from "@/functions/phone";
 import { InputField } from "../ui/InputField";
 import { SelectField } from "../ui/select-field";
 import {
+  corRacaOptions,
   escolaridadeOptions,
   estadoCivilOptions,
   sexoOptions,
@@ -41,8 +42,9 @@ export const DadosPessoaisForm = ({ register, control, errors }: DadosPessoaisFo
         error={errors.dataNascimento}
       />
 
-      <InputField 
-        label="E-mail" {...register("email")} 
+      <InputField
+        label="E-mail"
+        {...register("email")}
         error={errors.email} />
 
       <InputField
@@ -57,6 +59,13 @@ export const DadosPessoaisForm = ({ register, control, errors }: DadosPessoaisFo
         name="sexo"
         label="Sexo"
         options={sexoOptions}
+      />
+
+      <SelectField
+        control={control}
+        name="corRaca"
+        label="Cor/Raça"
+        options={corRacaOptions}
       />
 
       <SelectField

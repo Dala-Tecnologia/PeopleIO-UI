@@ -2,6 +2,8 @@ import type { Control, UseFormRegister, UseFormSetValue, FieldErrors } from "rea
 import type { FormDataInput } from "@/types/FormData";
 import { insertMaskInCEP } from "@/functions/cep";
 import { useState } from "react";
+import { SelectField } from "../ui/select-field";
+import { estadosOptions } from "@/constrants/options";
 
 interface EnderecoFormProps {
   register: UseFormRegister<FormDataInput>;
@@ -10,7 +12,7 @@ interface EnderecoFormProps {
   errors: FieldErrors<FormDataInput>;
 }
 
-export const EnderecoForm = ({ register, setValue, errors }: EnderecoFormProps) => {
+export const EnderecoForm = ({ register, setValue, control, errors }: EnderecoFormProps) => {
   const [loadingCep, setLoadingCep] = useState(false);
 
   async function buscarCEP(cep: string) {
@@ -26,7 +28,6 @@ export const EnderecoForm = ({ register, setValue, errors }: EnderecoFormProps) 
 
       if (data.erro) return;
 
-      // Preenche automaticamente os campos sem disparar validação
       setValue("endereco.rua", data.logradouro || "", { shouldValidate: false });
       setValue("endereco.bairro", data.bairro || "", { shouldValidate: false });
       setValue("endereco.cidade", data.localidade || "", { shouldValidate: false });
@@ -84,10 +85,12 @@ export const EnderecoForm = ({ register, setValue, errors }: EnderecoFormProps) 
         <input {...register("endereco.cidade")} className="pio-input" />
       </div>
 
-      <div>
-        <label className="pio-label">Estado</label>
-        <input {...register("endereco.estado")} className="pio-input" />
-      </div>
+      <SelectField
+        control={control}
+        name="endereco.estado"
+        label="Estado"
+        options={estadosOptions}
+      />
     </div>
   );
 };

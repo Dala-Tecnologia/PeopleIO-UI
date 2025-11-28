@@ -20,7 +20,7 @@ export const SelectField = <T extends FieldValues,>({
   control,
   name,
   label,
-  placeholder = "Selecione",
+  placeholder = "",
   options,
   className,
 } : SelectFieldProps<T>) => {
@@ -33,7 +33,7 @@ export const SelectField = <T extends FieldValues,>({
         name={name}
         render={({ field }) => (
           <Select value={field.value ?? ""} onValueChange={field.onChange}>
-            <SelectTrigger className={className ?? "pio-input"}>
+            <SelectTrigger className={className}>
               <SelectValue placeholder={placeholder} />
             </SelectTrigger>
 

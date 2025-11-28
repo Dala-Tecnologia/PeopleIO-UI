@@ -53,21 +53,26 @@ export const colaboradorSchema = z.object({
   departamento: z.string().nullable(),
   dataAdmissao: z.string().nullable(),
 
-  identidadeNumero: z.string(),
-  identidadeOrgaoEmissor: z.string(),
+  identidadeNumero: z.string().max(10, "RG deve ter no máximo 10 caracteres."),
+  identidadeOrgaoEmissor: z.string().max(10, "Órgão Emissor deve ter no máximo 10 caracteres."),
   identidadeUF: z.string(),
   identidadeDataEmissao: z.string(),
 
   ctpsNumero: z
     .string()
-    .min(1, { message: "O campo Nº da CTPS é obrigatório." }),
+    .min(1, { message: "O campo Nº da CTPS é obrigatório." })
+    .max(10, "Numero do CTPS deve ter no máximo 10 caracteres."),
   ctpsSerie: z
     .string()
-    .min(1, { message: "O campo Série da CTPS é obrigatório." }),
+    .min(1, { message: "O campo Série da CTPS é obrigatório." })
+    .max(10, "Numero de Série do CTPS deve ter no máximo 10 caracteres."),
   ctpsDataEmissao: z
-    .string()
+    .date()
     .min(1, { message: "O campo Data de Emissão da CTPS é obrigatório." }),
-  ctpsuf: z.string().min(2, { message: "O campo UF da CTPS é obrigatório." }),
+  
+  ctpsuf: z
+    .string()
+    .min(2, { message: "O campo UF da CTPS é obrigatório." }),
 
   tituloEleitor: z
     .string()
