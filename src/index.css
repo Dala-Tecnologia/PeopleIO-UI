@@ -69,6 +69,7 @@
     --color-sidebar-ring: var(--sidebar-ring);}
 
 :root {
+    --heading-color: #111827;
     --radius: 0.625rem;
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
@@ -103,7 +104,9 @@
     --sidebar-ring: oklch(0.708 0 0);}
 
 .dark {
-    --background: oklch(0.145 0 0);
+    --heading-color: #ffffff;
+    --bg-primary: oklch(0.145 0 0);
+    --background: oklch(20.196% 0.08318 301.632);
     --foreground: oklch(0.985 0 0);
     --card: oklch(0.205 0 0);
     --card-foreground: oklch(0.985 0 0);
@@ -133,10 +136,31 @@
     --sidebar-accent: oklch(0.269 0 0);
     --sidebar-accent-foreground: oklch(0.985 0 0);
     --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);}
+    --sidebar-ring: oklch(0.556 0 0);
+    --gradient-from: #ff80b5;
+    --gradient-to: #9089fc;
+}
 
 @layer base {
   * {
     @apply border-border outline-ring/50;}
   body {
     @apply bg-background text-foreground;}}
+
+
+.bg-bg-primary {
+  background-color: var(--bg-primary);
+  transition: background-color 0.3s ease;
+}
+
+.bg-gradient-theme {
+  background: linear-gradient(
+    135deg,
+    var(--gradient-from),
+    var(--gradient-to)
+  );
+}
+
+h1, .app-heading {
+  color: var(--heading-color);
+}
