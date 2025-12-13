@@ -37,7 +37,7 @@ export type FormData = {
   tituloSecao: string;
   cnhNumero: string;
   cnhuf: string;
-  cnhDataVencimento: string;
+  cnhDataVencimento: string | null;
   cnhOrgaoEmissor: string;
   cnhTipo: string;
   corRaca: string;

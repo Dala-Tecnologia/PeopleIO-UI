@@ -28,22 +28,73 @@ export const ColaboradoresList = () => {
     fetchData();
   }, []);
 
-  if (loading) return <div>Carregando...</div>;
+  const handleDelete = async (id: string) => {
+    if (window.confirm("Tem certeza que deseja excluir este colaborador?")) {
+      try {
+        await colaboradoresService.delete(id);
+        setItems(items.filter((c) => c.id !== id));
+      } catch (err: any) {
+        setError(err.message);
+      }
+    }
+  };
+
+  if (loading) return 
+    <div className="flex items-center justify-center">
+      <div
+        className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
+        role="status">
+        <span
+          className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]"
+          >Loading...</span>
+      </div>
+    </div>;
   if (error) return <div className="text-red-500">Erro ao carregar colaboradores: {error}</div>;
 
   return (
     <div>
       <h1 className="text-2xl mb-4">Colaboradores</h1>
-      <Link to="/colaboradores/new" className="btn">Novo colaborador</Link>
-      <ul className="mt-4">
-        {items.map((c) => (
-          <li key={c.id} className="py-2">
-            <Link to={`/colaboradores/${c.id}`}>
-              {c.nome} - {c.cpf} - {c.email}
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <Link to="/colaboradores/new" className="pio-btn-primary">Novo colaborador</Link>
+
+      <div className="relative overflow-x-auto shadow-md sm:rounded-lg mt-4">
+        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+              <th scope="col" className="px-6 py-3">
+                Nome
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Email
+              </th>
+              <th scope="col" className="px-6 py-3">
+                CPF
+              </th>
+              <th scope="col" className="px-6 py-3">
+                Ações
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((colaborador) => (
+              <tr key={colaborador.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
+                <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                  {colaborador.nome}
+                </th>
+                <td className="px-6 py-4">
+                  {colaborador.email}
+                </td>
+                <td className="px-6 py-4">
+                  {colaborador.cpf}
+                </td>
+                <td className="px-6 py-4 flex gap-4">
+                  <Link to={`/colaboradores/${colaborador.id}`} className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Editar</Link>
+                  <button onClick={() => handleDelete(colaborador.id)} className="font-medium text-red-600 dark:text-red-500 hover:underline">Excluir</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

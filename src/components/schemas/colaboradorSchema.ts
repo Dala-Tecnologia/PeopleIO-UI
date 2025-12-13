@@ -45,18 +45,24 @@ export const colaboradorSchema = z.object({
     .string()
     .min(1, { message: "O campo Data de Nascimento é obrigatório." }),
 
-  email: z.string().email({ message: "Informe um e-mail válido." }),
+  email: z
+    .email({ message: "Informe um e-mail válido." }),
 
   endereco: enderecoSchema,
-
   cargo: z.string().nullable(),
   departamento: z.string().nullable(),
   dataAdmissao: z.string().nullable(),
 
-  identidadeNumero: z.string().max(10, "RG deve ter no máximo 10 caracteres."),
-  identidadeOrgaoEmissor: z.string().max(10, "Órgão Emissor deve ter no máximo 10 caracteres."),
-  identidadeUF: z.string(),
-  identidadeDataEmissao: z.string(),
+  identidadeNumero: z
+    .string()
+    .max(10, "RG deve ter no máximo 10 caracteres."),
+  identidadeOrgaoEmissor: z
+    .string()
+    .max(10, "Órgão Emissor deve ter no máximo 10 caracteres."),
+  identidadeUF: z
+    .string(),
+  identidadeDataEmissao: z
+    .string(),
 
   ctpsNumero: z
     .string()
@@ -92,18 +98,26 @@ export const colaboradorSchema = z.object({
 
   cnhNumero: z
     .string()
-    .min(1, { message: "O campo Número da CNH é obrigatório." }),
-  cnhuf: z.string().min(2, { message: "O campo UF da CNH é obrigatório." }),
+    .nullable(),
+  cnhuf: z
+    .string()
+    .nullable(),
   cnhDataVencimento: z
     .string()
-    .min(1, { message: "O campo Data de Vencimento é obrigatório." }),
+    .nullable(),
   cnhOrgaoEmissor: z
     .string()
-    .min(1, { message: "O campo Órgão Emissor da CNH é obrigatório." }),
-  cnhTipo: z.string().min(1, { message: "O campo Tipo de CNH é obrigatório." }),
+    .nullable(),
+  cnhTipo: z
+    .string()
+    .nullable(),
 
-  corRaca: z.string().min(1, { message: "O campo Cor/Raça é obrigatório." }),
-  sexo: z.string().min(1, { message: "O campo Sexo é obrigatório." }),
+  corRaca: z
+    .string()
+    .min(1, { message: "O campo Cor/Raça é obrigatório." }),
+  sexo: z
+    .string()
+    .min(1, { message: "O campo Sexo é obrigatório." }),
   escolaridade: z
     .string()
     .min(1, { message: "O campo Escolaridade é obrigatório." }),

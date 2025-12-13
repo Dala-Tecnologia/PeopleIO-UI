@@ -54,7 +54,7 @@ export const FormularioColaborador = () => {
       tituloSecao: "",
       cnhNumero: "",
       cnhuf: "",
-      cnhDataVencimento: "",
+      cnhDataVencimento: null,
       cnhOrgaoEmissor: "",
       cnhTipo: "",
       corRaca: "",
@@ -108,6 +108,7 @@ export const FormularioColaborador = () => {
       // Converte para FormData com Arquivo objects
       const payload: FormData = {
         ...data,
+        cnhDataVencimento: data.cnhDataVencimento || null,
         arquivoRG: rgUrl
           ? {
             nomeArquivo: rgUrl.split("/").pop()!,
