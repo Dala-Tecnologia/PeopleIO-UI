@@ -4,7 +4,7 @@ import { insertMaskInCEP } from "@/functions/cep";
 import { useState } from "react";
 import { SelectField } from "../ui/select-field";
 import { estadosOptions } from "@/constrants/options";
-import { somenteNumerosMascara } from "@/functions/identidadeNumero";
+
 
 interface EnderecoFormProps {
   register: UseFormRegister<FormDataInput>;
