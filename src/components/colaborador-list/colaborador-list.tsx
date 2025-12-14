@@ -53,7 +53,14 @@ export const ColaboradoresList = () => {
 
   return (
     <div>
-      <h1 className="text-2xl mb-4">Colaboradores</h1>
+      <div className="mx-auto max-w-2xl text-center mb-25">
+        <h2 className="text-4xl font-semibold tracking-tight .app-heading sm:text-5xl">
+          Colaboradores
+        </h2>
+        <p className="mt-2 text-lg text-gray-400">
+          Listagem de colaboradores registrados.
+        </p>
+      </div>
       <Link to="/colaboradores/new" className="pio-btn-primary">Novo colaborador</Link>
 
       <div className="relative overflow-x-auto shadow-md sm:rounded-lg mt-4">
