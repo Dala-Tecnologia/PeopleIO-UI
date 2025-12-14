@@ -23,6 +23,7 @@ export const colaboradorSchema = z.object({
   nome: z.string().min(3, {
     message: "O campo Nome completo deve ter pelo menos 3 caracteres.",
   }),
+  nomeSocial: z.string().nullable(),
   cpf: z
     .string()
     .min(11, { message: "CPF deve ter ao menos 11 caracteres." })

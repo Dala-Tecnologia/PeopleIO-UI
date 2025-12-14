@@ -7,6 +7,7 @@ export type Arquivo = {
 
 export type FormData = {
   nome: string;
+  nomeSocial: string | null;
   cpf: string;
   dataNascimento: string;
   email: string;

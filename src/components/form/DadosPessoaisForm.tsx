@@ -29,6 +29,12 @@ export const DadosPessoaisForm = ({ register, control, errors }: DadosPessoaisFo
       />
 
       <InputField
+        label="Nome Social"
+        {...register("nomeSocial")}
+        error={errors.nomeSocial}
+      />
+
+      <InputField
         label="CPF"
         {...register("cpf")}
         mask={insertMaskInCPF}

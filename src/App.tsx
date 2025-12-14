@@ -3,6 +3,7 @@ import Header from '@/components/base/Header'
 import { FormularioColaborador } from './components/form/FormularioColaborador'
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ColaboradoresList } from './components/colaborador-list/colaborador-list';
+import { Loader } from './components/ui/loader';
 
 export default function App() {
   return (
@@ -24,7 +25,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/colaboradores" replace />} />
         <Route path="/colaboradores" element={<ColaboradoresList/>} />
-        <Route path="/colaboradores/new" element={<FormularioColaborador />} />
+        <Route path="/colaboradores/novo" element={<FormularioColaborador />} />
+        <Route path="/loader" element={<Loader />} />
       </Routes>
       </div>
     </>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { colaboradoresService } from "../../services/colaboradoresService";
+import { Modal } from "@/components/ui/modal";
 
 type Colaborador = {
   id: string;
@@ -14,6 +15,8 @@ export const ColaboradoresList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [colaboradorToDelete, setColaboradorToDelete] = useState<Colaborador | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,14 +32,21 @@ export const ColaboradoresList = () => {
     fetchData();
   }, []);
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm("Tem certeza que deseja excluir este colaborador?")) {
-      try {
-        await colaboradoresService.delete(id);
-        setItems(items.filter((c) => c.id !== id));
-      } catch (err: any) {
-        setError(err.message);
-      }
+  const openDeleteModal = (colaborador: Colaborador) => {
+    setColaboradorToDelete(colaborador);
+    setIsModalOpen(true);
+  };
+
+  const closeDeleteModal = () => {
+    setColaboradorToDelete(null);
+    setIsModalOpen(false);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (colaboradorToDelete) {
+      await colaboradoresService.delete(colaboradorToDelete.id);
+      setItems(items.filter((c) => c.id !== colaboradorToDelete.id));
+      closeDeleteModal();
     }
   };
 
@@ -64,7 +74,7 @@ export const ColaboradoresList = () => {
   );
 
   return (
-    <div>
+    <>
       <div className="mx-auto max-w-2xl text-center mb-25">
         <h2 className="text-4xl font-semibold tracking-tight .app-heading sm:text-5xl">
           Colaboradores
@@ -74,7 +84,7 @@ export const ColaboradoresList = () => {
         </p>
       </div>
       <div className="flex justify-between items-center mb-4">
-        <Link to="/colaboradores/new" className="pio-btn-primary">Novo colaborador</Link>
+        <Link to="/colaboradores/novo" className="pio-btn-primary">Novo colaborador</Link>
         <div className="w-1/3 ml-5">
           <input
             type="text"
@@ -88,7 +98,7 @@ export const ColaboradoresList = () => {
       
 
       <div className="relative overflow-x-auto shadow-md sm:rounded-lg mt-4">
-        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+        <table className="w-full text-sm text-left rtl:text-right text-gray-600 dark:text-gray-400">
           <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
               <th scope="col" className="px-6 py-3">
@@ -107,8 +117,8 @@ export const ColaboradoresList = () => {
           </thead>
           <tbody>
             {filteredItems.map((colaborador) => (
-              <tr key={colaborador.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+              <tr key={colaborador.id} className="bg-white border-b dark:bg-gray-800/50 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+                <th scope="row" className="px-6 py-4 font-medium dark:text-gray-900 whitespace-nowrap dark:text-white">
                   {colaborador.nome}
                 </th>
                 <td className="px-6 py-4">
@@ -119,13 +129,22 @@ export const ColaboradoresList = () => {
                 </td>
                 <td className="px-6 py-4 flex gap-4">
                   <Link to={`/colaboradores/${colaborador.id}`} className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Editar</Link>
-                  <button onClick={() => handleDelete(colaborador.id)} className="font-medium text-red-600 dark:text-red-500 hover:underline">Excluir</button>
+                  <button onClick={() => openDeleteModal(colaborador)} className="font-medium text-red-600 dark:text-red-500 hover:underline">Excluir</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </div>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={handleDeleteConfirm}
+        title="Excluir Colaborador"
+      >
+        <p>Você tem certeza que deseja excluir o colaborador <strong>{colaboradorToDelete?.nome}</strong>?</p>
+        <p className="mt-2">Essa ação não poderá ser desfeita.</p>
+      </Modal>
+    </>
   );
 }

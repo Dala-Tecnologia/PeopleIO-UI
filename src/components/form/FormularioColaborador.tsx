@@ -1,16 +1,18 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { colaboradorSchema } from "@/components/schemas/colaboradorSchema";
 
 import type { FormData, FormDataInput } from "@/types/FormData";
 
+import { Loader } from "@/components/ui/loader";
 import { DadosPessoaisForm } from "./DadosPessoaisForm";
 import { DocumentosForm } from "./DocumentosForm";
 import { EnderecoForm } from "./EnderecoForm";
 import { DocumentosOpcionaisForm } from "./DocumentosOpcionaisForm";
 import { useBlobUploader } from "@/hooks/useBlobUploader";
 import { colaboradoresService } from "@/services/colaboradoresService";
-
 
 export const FormularioColaborador = () => {
   const {
@@ -70,91 +72,74 @@ export const FormularioColaborador = () => {
     },
   });
 
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
   const uploader = useBlobUploader() as any;
 
   async function processFile(
     file: File | null,
     prefix: string,
     nome: string,
-    cpf: string
+    cpf: string,
   ) {
     if (!file) return null;
-
+  
     const extension = file.name.split(".").pop();
     const filename = `${prefix}-${crypto.randomUUID()}-${nome}.${extension}`;
-
+  
     const uploadFn = typeof uploader === "function" ? uploader
       : uploader?.uploadFile ?? uploader?.upload;
-
+  
     if (!uploadFn) {
       throw new Error("Uploader não configurado corretamente");
     }
-
-    return await uploadFn(file, filename, cpf);
+  
+    const url = await uploadFn(file, filename, cpf);
+  
+    return {
+      nomeArquivo: filename,
+      url: url,
+      tipoMime: file.type,
+      dataUpload: new Date().toISOString(),
+    };
   }
 
   async function onSubmit(data: FormDataInput) {
     try {
-      const rgUrl = await processFile(data.arquivoRG, "RG", data.nome, data.cpf);
-      const cnhUrl = await processFile(data.arquivoCNH, "CNH", data.nome, data.cpf);
-      const cpfUrl = await processFile(data.arquivoCPF, "CPF", data.nome, data.cpf);
-      const crUrl = await processFile(
+      setIsLoading(true);
+      const arquivoRG = await processFile(data.arquivoRG, "RG", data.nome, data.cpf);
+      const arquivoCNH = await processFile(data.arquivoCNH, "CNH", data.nome, data.cpf);
+      const arquivoCPF = await processFile(data.arquivoCPF, "CPF", data.nome, data.cpf);
+      const arquivoComprovanteResidencia = await processFile(
         data.arquivoComprovanteResidencia,
         "CR",
         data.nome,
         data.cpf
       );
 
-      // Converte para FormData com Arquivo objects
       const payload: FormData = {
         ...data,
         cnhDataVencimento: data.cnhDataVencimento || null,
-        arquivoRG: rgUrl
-          ? {
-            nomeArquivo: rgUrl.split("/").pop()!,
-            url: rgUrl,
-            tipoMime: data.arquivoRG!.type,
-            dataUpload: new Date().toISOString(),
-          }
-          : null,
-        arquivoCNH: cnhUrl
-          ? {
-            nomeArquivo: cnhUrl.split("/").pop()!,
-            url: cnhUrl,
-            tipoMime: data.arquivoCNH!.type,
-            dataUpload: new Date().toISOString(),
-          }
-          : null,
-        arquivoCPF: cpfUrl
-          ? {
-            nomeArquivo: cpfUrl.split("/").pop()!,
-            url: cpfUrl,
-            tipoMime: data.arquivoCPF!.type,
-            dataUpload: new Date().toISOString(),
-          }
-          : null,
-        arquivoComprovanteResidencia: crUrl
-          ? {
-            nomeArquivo: crUrl.split("/").pop()!,
-            url: crUrl,
-            tipoMime: data.arquivoComprovanteResidencia!.type,
-            dataUpload: new Date().toISOString(),
-          }
-          : null,
+        arquivoRG,
+        arquivoCNH,
+        arquivoCPF,
+        arquivoComprovanteResidencia,
       };
 
-      // Envia para API
-      const result = await colaboradoresService.create(payload);
-      console.log("Enviado com sucesso:", result);
+      await colaboradoresService.create(payload);
+      setIsLoading(false);
+      navigate("/colaboradores");
 
     } catch (error) {
       console.error("Erro na submissão do formulário:", error);
-      throw error;
+      setIsLoading(false);
     }
   }
 
   return (
     <>
+      {isLoading && <Loader />}
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="text-4xl font-semibold tracking-tight .app-heading sm:text-5xl">
           Cadastro de Colaborador
