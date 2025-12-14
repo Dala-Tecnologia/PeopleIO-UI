@@ -51,14 +51,17 @@ export type FormData = {
   arquivoCNH: Arquivo | null;
   arquivoCPF: Arquivo | null;
   arquivoComprovanteResidencia: Arquivo | null;
+  arquivoCurriculo: Arquivo | null;
 };
 
 export type FormDataInput = Omit<
   FormData,
-  "arquivoRG" | "arquivoCNH" | "arquivoCPF" | "arquivoComprovanteResidencia"
+  "arquivoRG" | "arquivoCNH" | "arquivoCPF" | "arquivoComprovanteResidencia" | "arquivoCurriculo"
 > & {
   arquivoRG: File | null;
   arquivoCNH: File | null;
   arquivoCPF: File | null;
   arquivoComprovanteResidencia: File | null;
+  arquivoCurriculo: File | null;
+
 };

@@ -10,6 +10,7 @@ import { cnhTipo, estadosOptions } from "@/constrants/options";
 import { SelectField } from "../ui/select-field";
 import { InputField } from "../ui/InputField";
 import { DateField } from "../ui/date-field";
+import { somenteNumerosMascara } from "@/functions/identidadeNumero";
 
 interface DocumentosOpcionaisFormProps {
     register: UseFormRegister<FormDataInput>;
@@ -25,6 +26,7 @@ export const DocumentosOpcionaisForm = ({ register, control, setValue, errors }:
                 <InputField
                     label="Titulo de Eleitor - Número"
                     {...register("tituloEleitor")}
+                    mask={somenteNumerosMascara}
                     error={errors.tituloEleitor}
                 />
 
@@ -51,6 +53,7 @@ export const DocumentosOpcionaisForm = ({ register, control, setValue, errors }:
                 <InputField
                     label="CNH - Número"
                     {...register("cnhNumero")}
+                    mask={somenteNumerosMascara}
                     error={errors.cnhNumero}
                 />
 
@@ -122,6 +125,16 @@ export const DocumentosOpcionaisForm = ({ register, control, setValue, errors }:
                     onSelected={(file) =>
                         setValue(
                             "arquivoComprovanteResidencia",
+                            file
+                        )
+                    }
+                />
+
+                <FileUpload
+                    label="Curriculo"
+                    onSelected={(file) =>
+                        setValue(
+                            "arquivoCurriculo",
                             file
                         )
                     }

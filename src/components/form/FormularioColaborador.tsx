@@ -26,6 +26,7 @@ export const FormularioColaborador = () => {
     mode: "onChange",
     defaultValues: {
       nome: "",
+      nomeSocial: "",
       cpf: "",
       dataNascimento: "",
       email: "",
@@ -69,6 +70,7 @@ export const FormularioColaborador = () => {
       arquivoCNH: null,
       arquivoCPF: null,
       arquivoComprovanteResidencia: null,
+      arquivoCurriculo: null
     },
   });
 
@@ -111,6 +113,7 @@ export const FormularioColaborador = () => {
       const arquivoRG = await processFile(data.arquivoRG, "RG", data.nome, data.cpf);
       const arquivoCNH = await processFile(data.arquivoCNH, "CNH", data.nome, data.cpf);
       const arquivoCPF = await processFile(data.arquivoCPF, "CPF", data.nome, data.cpf);
+      const arquivoCurriculo = await processFile(data.arquivoCurriculo, "Curriculo", data.nome, data.cpf);
       const arquivoComprovanteResidencia = await processFile(
         data.arquivoComprovanteResidencia,
         "CR",
@@ -125,6 +128,7 @@ export const FormularioColaborador = () => {
         arquivoCNH,
         arquivoCPF,
         arquivoComprovanteResidencia,
+        arquivoCurriculo,
       };
 
       await colaboradoresService.create(payload);

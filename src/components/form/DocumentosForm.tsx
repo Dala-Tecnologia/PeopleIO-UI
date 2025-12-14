@@ -9,6 +9,7 @@ import { estadosOptions } from "@/constrants/options";
 import { SelectField } from "../ui/select-field";
 import { DateField } from "../ui/date-field";
 import { InputField } from "../ui/InputField";
+import { somenteNumerosMascara } from "@/functions/identidadeNumero";
 
 interface DocumentosFormProps {
   register: UseFormRegister<FormDataInput>;
@@ -23,6 +24,7 @@ export const DocumentosForm = ({ register, control, errors }: DocumentosFormProp
       <InputField
         label="RG - Número"
         {...register("identidadeNumero")}
+        mask={somenteNumerosMascara}
         error={errors.identidadeNumero}
       />
       <InputField
@@ -50,6 +52,7 @@ export const DocumentosForm = ({ register, control, errors }: DocumentosFormProp
         label="CTPS - Número"
         {...register("ctpsNumero")}
         error={errors.ctpsNumero}
+        mask={somenteNumerosMascara}
       />
 
       <InputField

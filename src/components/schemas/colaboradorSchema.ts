@@ -23,7 +23,10 @@ export const colaboradorSchema = z.object({
   nome: z.string().min(3, {
     message: "O campo Nome completo deve ter pelo menos 3 caracteres.",
   }),
-  nomeSocial: z.string().nullable(),
+  nomeSocial: z
+    .string()
+    .max(50, { message: "Maximo 50 caracteres." })
+    .nullable(),
   cpf: z
     .string()
     .min(11, { message: "CPF deve ter ao menos 11 caracteres." })
@@ -34,7 +37,7 @@ export const colaboradorSchema = z.object({
     }),
 
   telefone: z
-    .string()
+    .string() 
     .min(10, { message: "Telefone inválido." })
     .max(15)
     .transform((v) => v.replace(/\D/g, ""))
@@ -56,7 +59,8 @@ export const colaboradorSchema = z.object({
 
   identidadeNumero: z
     .string()
-    .max(10, "RG deve ter no máximo 10 caracteres."),
+    .max(10, "RG deve ter no máximo 10 caracteres.")
+    .transform((v) => v.replace(/\D/g, "")),
   identidadeOrgaoEmissor: z
     .string()
     .max(10, "Órgão Emissor deve ter no máximo 10 caracteres."),
@@ -68,7 +72,8 @@ export const colaboradorSchema = z.object({
   ctpsNumero: z
     .string()
     .min(1, { message: "O campo Nº da CTPS é obrigatório." })
-    .max(10, "Numero do CTPS deve ter no máximo 10 caracteres."),
+    .max(10, "Numero do CTPS deve ter no máximo 10 caracteres.")
+    .transform((v) => v.replace(/\D/g, "")),
   ctpsSerie: z
     .string()
     .min(1, { message: "O campo Série da CTPS é obrigatório." })
