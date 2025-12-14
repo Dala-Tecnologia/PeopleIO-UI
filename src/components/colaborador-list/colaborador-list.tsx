@@ -13,6 +13,7 @@ export const ColaboradoresList = () => {
   const [items, setItems] = useState<Colaborador[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -51,6 +52,17 @@ export const ColaboradoresList = () => {
     </div>;
   if (error) return <div className="text-red-500">Erro ao carregar colaboradores: {error}</div>;
 
+  const normalizedSearch = searchQuery.toLowerCase();
+  const numericSearch = searchQuery.replace(/\D/g, "");
+
+  const filteredItems = items.filter(
+    (colaborador) =>
+      colaborador.nome.toLowerCase().includes(normalizedSearch) ||
+      (numericSearch.length > 0 && colaborador.cpf.replace(/\D/g, "").includes(numericSearch)) ||
+      (colaborador.email &&
+        colaborador.email.toLowerCase().includes(normalizedSearch))
+  );
+
   return (
     <div>
       <div className="mx-auto max-w-2xl text-center mb-25">
@@ -61,7 +73,19 @@ export const ColaboradoresList = () => {
           Listagem de colaboradores registrados.
         </p>
       </div>
-      <Link to="/colaboradores/new" className="pio-btn-primary">Novo colaborador</Link>
+      <div className="flex justify-between items-center mb-4">
+        <Link to="/colaboradores/new" className="pio-btn-primary">Novo colaborador</Link>
+        <div className="w-1/3 ml-5">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar por nome, CPF ou email..."
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+          />
+        </div>
+      </div>
+      
 
       <div className="relative overflow-x-auto shadow-md sm:rounded-lg mt-4">
         <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
@@ -82,7 +106,7 @@ export const ColaboradoresList = () => {
             </tr>
           </thead>
           <tbody>
-            {items.map((colaborador) => (
+            {filteredItems.map((colaborador) => (
               <tr key={colaborador.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
                 <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                   {colaborador.nome}
