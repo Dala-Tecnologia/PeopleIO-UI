@@ -145,7 +145,7 @@ export const FormularioColaborador = () => {
     <>
       {isLoading && <Loader />}
       <div className="mx-auto max-w-2xl text-center">
-        <h2 className="text-4xl font-semibold tracking-tight .app-heading sm:text-5xl">
+        <h2 className="text-4xl font-semibold tracking-tight app-heading sm:text-5xl">
           Cadastro de Colaborador
         </h2>
         <p className="mt-2 text-lg text-gray-400">

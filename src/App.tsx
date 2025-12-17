@@ -7,9 +7,9 @@ import { Loader } from './components/ui/loader';
 
 export default function App() {
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <Header />
-      <div className="isolate bg-bg-primary px-6 py-24 sm:py-32 lg:px-8">
+      <main className="flex-grow isolate bg-bg-primary px-6 py-24 sm:py-32 lg:px-8">
         <div
           aria-hidden="true"
           className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
@@ -23,14 +23,12 @@ export default function App() {
           ></div>
         </div>
       <Routes>
-        <Route path="/" element={<Navigate to="/colaboradores" replace />} />
+        <Route path="/" element={<Navigate to="/colaboradores" replace={true} />} />
         <Route path="/colaboradores" element={<ColaboradoresList/>} />
         <Route path="/colaboradores/novo" element={<FormularioColaborador />} />
         <Route path="/loader" element={<Loader />} />
       </Routes>
-      </div>
-    </>
+      </main>
+    </div>
   )
 }
-
-
