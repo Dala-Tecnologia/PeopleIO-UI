@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { colaboradoresService } from "../../services/colaboradoresService";
 import { Modal } from "@/components/ui/modal";
 import { Loader } from "../ui/loader";
+import { insertMaskInCPF } from "@/functions/cpf";
 
 type Colaborador = {
   id: string;
@@ -120,7 +121,7 @@ export const ColaboradoresList = () => {
                   {colaborador.email}
                 </td>
                 <td className="px-6 py-4">
-                  {colaborador.cpf}
+                  {insertMaskInCPF(colaborador.cpf)} 
                 </td>
                 <td className="px-6 py-4 flex gap-4">
                   <Link to={`/colaboradores/${colaborador.id}`} className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Editar</Link>

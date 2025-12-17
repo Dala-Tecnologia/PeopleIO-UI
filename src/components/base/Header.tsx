@@ -40,7 +40,7 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-purple-900/50 text-white shadow-md relative z-50">
+    <header className="bg-purple-900 text-white shadow-md relative z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
         <Link
           to="/"
