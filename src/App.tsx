@@ -1,13 +1,31 @@
 import './App.css'
+import { useState } from 'react';
 import Header from '@/components/base/Header'
 import { FormularioColaborador } from './components/form/FormularioColaborador'
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ColaboradoresList } from './components/colaborador-list/colaborador-list';
 import { Loader } from './components/ui/loader';
+import { Notification } from './components/ui/Notification';
+import { NotificationContext } from './components/ui/NotificationContext';
+import type { NotificationData } from './components/ui/NotificationContext';
 
 export default function App() {
+  const [notification, setNotification] = useState<NotificationData | null>(null);
+
+  const showNotification = (notificationData: NotificationData) => {
+    setNotification(notificationData);
+  };
+
+  const hideNotification = () => {
+    setNotification(null);
+  };
+
   return (
-    <div className="flex flex-col min-h-screen">
+    <NotificationContext.Provider value={{ notification, showNotification, hideNotification }}>
+      <div className="flex flex-col min-h-screen">
+      {notification && (
+        <Notification message={notification.message} type={notification.type} onClose={hideNotification} />
+      )}
       <Header />
       <main className="flex-grow isolate bg-bg-primary px-6 py-24 sm:py-32 lg:px-8">
         <div
@@ -29,6 +47,7 @@ export default function App() {
         <Route path="/loader" element={<Loader />} />
       </Routes>
       </main>
-    </div>
+      </div>
+    </NotificationContext.Provider>
   )
 }

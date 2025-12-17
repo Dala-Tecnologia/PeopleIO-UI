@@ -13,6 +13,7 @@ import { EnderecoForm } from "./EnderecoForm";
 import { DocumentosOpcionaisForm } from "./DocumentosOpcionaisForm";
 import { useBlobUploader } from "@/hooks/useBlobUploader";
 import { colaboradoresService } from "@/services/colaboradoresService";
+import { useNotification } from "@/components/ui/NotificationContext";
 
 export const FormularioColaborador = () => {
   const {
@@ -76,6 +77,7 @@ export const FormularioColaborador = () => {
 
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { showNotification } = useNotification();
 
   const uploader = useBlobUploader() as any;
 
@@ -133,9 +135,11 @@ export const FormularioColaborador = () => {
 
       await colaboradoresService.create(payload);
       setIsLoading(false);
+      showNotification({ message: "Dados salvos com sucesso!", type: "success" });
       navigate("/colaboradores");
 
     } catch (error) {
+      showNotification({ message: "Houve um problema ao tentar salvar os dados. Tente novamente.", type: "error" });
       console.error("Erro na submissão do formulário:", error);
       setIsLoading(false);
     }

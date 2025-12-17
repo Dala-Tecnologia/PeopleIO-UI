@@ -4,6 +4,8 @@ import { insertMaskInCEP } from "@/functions/cep";
 import { useState } from "react";
 import { SelectField } from "../ui/select-field";
 import { estadosOptions } from "@/constrants/options";
+import { somenteNumerosMascara } from "@/functions/identidadeNumero";
+import { InputField } from "../ui/InputField";
 
 
 interface EnderecoFormProps {
@@ -47,44 +49,44 @@ export const EnderecoForm = ({ register, setValue, control, errors }: EnderecoFo
 
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-      <div>
-        <label className="pio-label">CEP</label>
-        <input
-          {...register("endereco.cep")}
-          className="pio-input"
-          placeholder="00000-000"
-          onChange={handleCepChange}
-          onBlur={(e) => buscarCEP(e.target.value)}
-        />
-        {errors.endereco?.cep && (
-          <p className="text-sm text-red-400 mt-1">
-            {errors.endereco.cep.message}
-          </p>
-        )}
-        {loadingCep && (
-          <p className="text-sm text-blue-400 mt-1">Buscando CEP...</p>
-        )}
-      </div>
+      <InputField
+        label="CEP"
+        {...register("endereco.cep")}
+        placeholder="00000-000"
+        error={errors.endereco?.cep}
+        mask={somenteNumerosMascara}
+        onBlur={(e) => buscarCEP(e.target.value)}
+        onChange={handleCepChange}
+      />
+      {loadingCep && (
+        <p className="text-sm text-blue-400 mt-1">Buscando CEP...</p>
+      )}
 
-      <div>
-        <label className="pio-label">Rua</label>
-        <input {...register("endereco.rua")} className="pio-input" />
-      </div>
+      <InputField
+        label="Rua"
+        {...register("endereco.rua")}
+        placeholder="Avenida Rio Branco"
+        error={errors.endereco?.rua}
+      />
 
-      <div>
-        <label className="pio-label">Número</label>
-        <input {...register("endereco.numero")} className="pio-input" />
-      </div>
+      <InputField
+        label="Número"
+        {...register("endereco.numero")}
+        error={errors.endereco?.numero}
+        mask={somenteNumerosMascara}
+      />
 
-      <div>
-        <label className="pio-label">Bairro</label>
-        <input {...register("endereco.bairro")} className="pio-input" />
-      </div>
+      <InputField
+        label="Bairro"
+        {...register("endereco.bairro")}
+        error={errors.endereco?.bairro}
+      />
 
-      <div>
-        <label className="pio-label">Cidade</label>
-        <input {...register("endereco.cidade")} className="pio-input" />
-      </div>
+      <InputField
+        label="Cidade"
+        {...register("endereco.cidade")}
+        error={errors.endereco?.cidade}
+      />
 
       <SelectField
         control={control}
