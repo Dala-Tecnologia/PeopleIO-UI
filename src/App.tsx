@@ -10,7 +10,7 @@ import { NotificationContext } from './components/ui/NotificationContext';
 import type { NotificationData } from './components/ui/NotificationContext';
 
 // Imports do MSAL (Azure AD)
-import { MsalProvider, AuthenticatedTemplate, UnauthenticatedTemplate, useMsal } from "@azure/msal-react";
+import { MsalProvider, AuthenticatedTemplate, UnauthenticatedTemplate } from "@azure/msal-react";
 import { PublicClientApplication, EventType } from "@azure/msal-browser";
 import { msalConfig, loginRequest } from './config/authConfig';
 import { PortalLayout } from './pages/portal/PortalLayout';
@@ -47,10 +47,6 @@ export default function App() {
 
   const hideNotification = () => {
     setNotification(null);
-  };
-
-  const handleLogin = () => {
-      msalInstance.loginRedirect(loginRequest).catch(e => console.error(e));
   };
 
   return (
