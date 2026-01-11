@@ -32,17 +32,10 @@ export const PortalHeader = () => {
                 <div className="hidden md:flex items-center gap-4">
                     <button
                         onClick={handleLogin}
-                        className="text-blue-900 font-medium hover:underline hover:text-green-500"
+                        className="text-blue-900 font-medium hover:underline hover:text-green-500 cursor-pointer"
                     >
                         Entrar
                     </button>
-
-                    <Link
-                        to="/register"
-                        className="rounded-md bg-blue-900 px-4 py-2 text-white hover:bg-green-500 transition"
-                    >
-                        Cadastrar-se
-                    </Link>
                 </div>
                 <button
                     onClick={() => setMenuOpen(!menuOpen)}
@@ -63,16 +56,10 @@ export const PortalHeader = () => {
                     <div className="pt-4 border-t flex flex-col gap-3">
                         <button
                             onClick={handleLogin}
-                            className="text-blue-600 font-medium"
+                            className="text-blue-600 font-medium cursor-pointer"
                         >
                             Entrar
                         </button>
-                        <Link
-                            to="/register"
-                            className="rounded-md bg-blue-600 px-4 py-2 text-center text-white"
-                        >
-                            Cadastrar-se
-                        </Link>
                     </div>
                 </div>
             )}

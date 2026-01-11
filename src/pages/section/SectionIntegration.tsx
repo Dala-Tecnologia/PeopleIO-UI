@@ -8,7 +8,7 @@ export const SectionIntegration = () => {
         >
             <div className="px-6 ml-5 rounded-2xl bg-blue-950">
                 <h1 className="text-xl font-bold md:text-4xl leading-tight m-4 text-white">
-                    A Integração perfeita <br/>entre pessoas e empresas.
+                    Encontre sua vaga, <br /> crie conexões!
                 </h1>
             </div>
         </section>
