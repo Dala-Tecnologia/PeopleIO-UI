@@ -1,4 +1,4 @@
-import api from "@/lib/api";
+import { api } from "@/lib/api";
 import type { FormData } from "@/types/FormData";
 
 export const colaboradoresService = {
