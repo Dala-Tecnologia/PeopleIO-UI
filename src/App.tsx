@@ -12,7 +12,7 @@ import type { NotificationData } from './components/ui/NotificationContext';
 // Imports do MSAL (Azure AD)
 import { MsalProvider, AuthenticatedTemplate, UnauthenticatedTemplate } from "@azure/msal-react";
 import { PublicClientApplication, EventType } from "@azure/msal-browser";
-import { msalConfig, loginRequest } from './config/authConfig';
+import { msalConfig } from './config/authConfig';
 import { PortalLayout } from './pages/portal/PortalLayout';
 
 // Inicializa a instância do MSAL fora do componente para evitar recriação
