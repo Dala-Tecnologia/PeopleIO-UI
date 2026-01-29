@@ -5,8 +5,8 @@ export const SectionSystems = () => {
         <section 
             className="flex flex-col md:flex-row h-auto md:h-96 items-center justify-between px-12 py-10 md:py-0 gap-8 md:gap-0"
         >
-            <div>
-                <img src={systemImg} alt="Ilustração de integração de sistemas" className='h-86 w-120 object-contain'/>
+            <div className="rounded-lg shadow-lg overflow-hidden bg-zinc-50">
+                <img src={systemImg} alt="Ilustração de integração de sistemas" className='h-86 w-120 object-contain rounded-lg'/>
             </div>
             <div className="px-6 ml-5">
                 <h1 className="text-xl font-bold md:text-4xl leading-tight m-4 text-blue-950">
