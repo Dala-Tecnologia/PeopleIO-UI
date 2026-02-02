@@ -5,14 +5,14 @@
 **PeopleIO-UI** is a React 19 + TypeScript + Vite application for collecting employee/contractor data via a multi-section form with validation, document uploads to Azure Blob Storage, and backend submission to a .NET API.
 
 ### Key Application Flow
-1. **FormularioColaborador** (main form component) orchestrates three sub-forms via `react-hook-form` + `zod` validation
-2. **Form State** is centralized in `FormData` type; validation schemas defined in `colaboradorSchema.ts`
+1. **FormularioCandidato** (main form component) orchestrates three sub-forms via `react-hook-form` + `zod` validation
+2. **Form State** is centralized in `FormData` type; validation schemas defined in `candidatoSchema.ts`
 3. **File Uploads** go directly to Azure Blob Storage using SAS token; URLs are stored in payload
-4. **Backend Integration** posts complete payload to `https://peopleio-api-dev.azurewebsites.net/api/v1/colaboradores`
+4. **Backend Integration** posts complete payload to `https://peopleio-api-dev.azurewebsites.net/api/v1/candidato`
 
 ### Component Hierarchy
 ```
-FormularioColaborador
+FormularioCandidato
 ├── DadosPessoaisForm (personal data: name, CPF, email, phone, dates)
 ├── EnderecoForm (address with CEP autocomplete via ViaCEP API)
 ├── DocumentosForm (file uploads: RG, CNH, CPF, proof of residence)
@@ -37,7 +37,7 @@ FormularioColaborador
 ## Design Patterns & Conventions
 
 ### Form Handling (react-hook-form + Zod)
-- **Resolver**: All forms use `zodResolver(colaboradorSchema)` pattern
+- **Resolver**: All forms use `zodResolver(candidatoSchema)` pattern
 - **Mode**: Set to `"onChange"` for real-time validation feedback
 - **Props Pattern**: Sub-forms receive `register`, `control`, `errors`, `setValue` from parent
 - **Nested Fields**: Access via dot notation—e.g., `setValue("endereco.cep", value)`
@@ -45,7 +45,7 @@ FormularioColaborador
 Example:
 ```tsx
 const { control, register, setValue, formState: { errors } } = useForm<FormData>({
-  resolver: zodResolver(colaboradorSchema),
+  resolver: zodResolver(candidatoSchema),
   mode: "onChange",
 });
 ```
@@ -77,16 +77,16 @@ const { control, register, setValue, formState: { errors } } = useForm<FormData>
 
 | Task | Files |
 |------|-------|
-| Add new form field | `src/components/schemas/colaboradorSchema.ts` (add Zod validation), `src/types/FormData.ts` (add type), target sub-form component |
+| Add new form field | `src/components/schemas/candidatoSchema.ts` (add Zod validation), `src/types/FormData.ts` (add type), target sub-form component |
 | Add input masking | `src/functions/{name}.ts`, import into sub-form, pass as `mask` prop to `InputField` |
-| Modify validation | `src/components/schemas/colaboradorSchema.ts` (update schema) |
-| Change form layout/styling | Target sub-form component or main `FormularioColaborador` (Tailwind classes) |
-| Fix API integration | `FormularioColaborador.onSubmit()` method; note: SAS token currently hardcoded |
+| Modify validation | `src/components/schemas/candidatoSchema.ts` (update schema) |
+| Change form layout/styling | Target sub-form component or main `FormularioCandidato` (Tailwind classes) |
+| Fix API integration | `FormularioCandidato.onSubmit()` method; note: SAS token currently hardcoded |
 | Add/update UI component | `src/components/ui/` (new or modify existing Radix-UI wrapper) |
 
 ## Critical Gotchas & Current Issues
 
-1. **Hardcoded SAS Token**: In `FormularioColaborador.uploadToBlob()`, SAS token is hardcoded as `"SEU_SAS_AQUI"` (placeholder). This will fail in production—move to environment variables ASAP.
+1. **Hardcoded SAS Token**: In `FormularioCandidato.uploadToBlob()`, SAS token is hardcoded as `"SEU_SAS_AQUI"` (placeholder). This will fail in production—move to environment variables ASAP.
 2. **MIME Type Bug**: All file uploads use `data.arquivoRG!.type` regardless of file type; should use the correct file's MIME type.
 3. **CEP Autocomplete**: Uses public ViaCEP API (no auth); assumes 8-digit format after masking.
 4. **No Error UI**: API errors are logged to console but not shown to user—needs proper error handling component.
@@ -102,7 +102,7 @@ const { control, register, setValue, formState: { errors } } = useForm<FormData>
 ## When Adding New Features
 
 1. **Update Type**: Add field to `FormData` type in `src/types/FormData.ts`
-2. **Add Validation**: Define Zod schema in `src/components/schemas/colaboradorSchema.ts`
+2. **Add Validation**: Define Zod schema in `src/components/schemas/candidatoSchema.ts`
 3. **Add Field Component**: Use `InputField`/`SelectField`/`DateField` in appropriate sub-form
 4. **If Masking Needed**: Create utility in `src/functions/{name}.ts`
 5. **Test Validation**: Run `npm run build` to catch TypeScript errors

@@ -1,9 +1,9 @@
 import './App.css'
 import { useState, useEffect } from 'react';
 import Header from '@/components/base/Header'
-import { FormularioColaborador } from './components/form/FormularioColaborador'
+import { FormularioCandidato } from './components/form/FormularioCandidato'
 import { Routes, Route, Navigate } from "react-router-dom";
-import { ColaboradoresList } from './components/colaborador-list/colaborador-list';
+import { CandidatoList } from './components/candidato/candidato-list';
 import { Loader } from './components/ui/loader';
 import { Notification } from './components/ui/Notification';
 import { NotificationContext } from './components/ui/NotificationContext';
@@ -78,9 +78,9 @@ export default function App() {
       <Header />
       <main className="flex-grow isolate px-6 py-24 sm:py-32 lg:px-8">
       <Routes>
-        <Route path="/" element={<Navigate to="/colaboradores" replace={true} />} />
-        <Route path="/colaboradores" element={<ColaboradoresList/>} />
-        <Route path="/colaboradores/novo" element={<FormularioColaborador />} />
+        <Route path="/" element={<Navigate to="/candidatos" replace={true} />} />
+        <Route path="/candidatos" element={<CandidatoList/>} />
+        <Route path="/candidato/novo" element={<FormularioCandidato />} />
         <Route path="/loader" element={<Loader />} />
       </Routes>
       </main>

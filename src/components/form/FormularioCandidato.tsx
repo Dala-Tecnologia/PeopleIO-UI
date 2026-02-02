@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { colaboradorSchema } from "@/components/schemas/colaboradorSchema";
+import { candidatoSchema } from "@/components/schemas/candidatoSchema";
 
 import type { FormData, FormDataInput } from "@/types/FormData";
 
@@ -12,10 +12,10 @@ import { DocumentosForm } from "./DocumentosForm";
 import { EnderecoForm } from "./EnderecoForm";
 import { DocumentosOpcionaisForm } from "./DocumentosOpcionaisForm";
 import { useBlobUploader } from "@/hooks/useBlobUploader";
-import { colaboradoresService } from "@/services/colaboradoresService";
+import { candidatoService } from "@/services/candidatoService";
 import { useNotification } from "@/components/ui/NotificationContext";
 
-export const FormularioColaborador = () => {
+export const FormularioCandidato = () => {
   const {
     control,
     register,
@@ -23,7 +23,7 @@ export const FormularioColaborador = () => {
     setValue,
     formState: { errors },
   } = useForm<FormDataInput>({
-    resolver: zodResolver(colaboradorSchema as any),
+    resolver: zodResolver(candidatoSchema as any),
     mode: "onChange",
     defaultValues: {
       nome: "",
@@ -133,10 +133,10 @@ export const FormularioColaborador = () => {
         arquivoCurriculo,
       };
 
-      await colaboradoresService.create(payload);
+      await candidatoService.create(payload);
       setIsLoading(false);
       showNotification({ message: "Dados salvos com sucesso!", type: "success" });
-      navigate("/colaboradores");
+      navigate("/candidato");
 
     } catch (error) {
       showNotification({ message: "Houve um problema ao tentar salvar os dados. Tente novamente.", type: "error" });
@@ -150,7 +150,7 @@ export const FormularioColaborador = () => {
       {isLoading && <Loader />}
       <div className="mx-auto max-w-2xl text-center">
         <h2 className="text-4xl font-semibold tracking-tight app-heading sm:text-5xl">
-          Cadastro de Colaborador
+          Cadastro do Candidato
         </h2>
         <p className="mt-2 text-lg text-gray-400">
           Por favor, preencher o formulário corretamente.
