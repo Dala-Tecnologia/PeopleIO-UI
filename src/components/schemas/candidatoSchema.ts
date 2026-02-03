@@ -19,7 +19,7 @@ export const enderecoSchema = z.object({
     }),
 });
 
-export const colaboradorSchema = z.object({
+export const candidatoSchema = z.object({
   nome: z.string().min(3, {
     message: "O campo Nome completo deve ter pelo menos 3 caracteres.",
   }),

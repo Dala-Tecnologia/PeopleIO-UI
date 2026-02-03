@@ -1,30 +1,30 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { colaboradoresService } from "../../services/colaboradoresService";
+import { candidatoesService } from "../../services/candidatoesService";
 import { Modal } from "@/components/ui/modal";
 import { Loader } from "../ui/loader";
 import { insertMaskInCPF } from "@/functions/cpf";
 
-type Colaborador = {
+type Candidato = {
   id: string;
   nome: string;
   cpf: string;
   email?: string;
 };
 
-export const ColaboradoresList = () => {
-  const [items, setItems] = useState<Colaborador[]>([]);
+export const CandidatoesList = () => {
+  const [items, setItems] = useState<Candidato[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [colaboradorToDelete, setColaboradorToDelete] = useState<Colaborador | null>(null);
+  const [candidatoToDelete, setCandidatoToDelete] = useState<Candidato | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const data = await colaboradoresService.list();
+        const data = await candidatoesService.list();
         setItems(data);
         setIsLoading(false);
       } catch (err: any) {
@@ -37,35 +37,35 @@ export const ColaboradoresList = () => {
     fetchData();
   }, []);
 
-  const openDeleteModal = (colaborador: Colaborador) => {
-    setColaboradorToDelete(colaborador);
+  const openDeleteModal = (candidato: Candidato) => {
+    setCandidatoToDelete(candidato);
     setIsModalOpen(true);
   };
 
   const closeDeleteModal = () => {
-    setColaboradorToDelete(null);
+    setCandidatoToDelete(null);
     setIsModalOpen(false);
   };
 
   const handleDeleteConfirm = async () => {
-    if (colaboradorToDelete) {
-      await colaboradoresService.delete(colaboradorToDelete.id);
-      setItems(items.filter((c) => c.id !== colaboradorToDelete.id));
+    if (candidatoToDelete) {
+      await candidatoesService.delete(candidatoToDelete.id);
+      setItems(items.filter((c) => c.id !== candidatoToDelete.id));
       closeDeleteModal();
     }
   };
 
-  if (error) return <div className="text-red-500">Erro ao carregar colaboradores: {error}</div>;
+  if (error) return <div className="text-red-500">Erro ao carregar candidatoes: {error}</div>;
 
   const normalizedSearch = searchQuery.toLowerCase();
   const numericSearch = searchQuery.replace(/\D/g, "");
 
   const filteredItems = items.filter(
-    (colaborador) =>
-      colaborador.nome.toLowerCase().includes(normalizedSearch) ||
-      (numericSearch.length > 0 && colaborador.cpf.replace(/\D/g, "").includes(numericSearch)) ||
-      (colaborador.email &&
-        colaborador.email.toLowerCase().includes(normalizedSearch))
+    (candidato) =>
+      candidato.nome.toLowerCase().includes(normalizedSearch) ||
+      (numericSearch.length > 0 && candidato.cpf.replace(/\D/g, "").includes(numericSearch)) ||
+      (candidato.email &&
+        candidato.email.toLowerCase().includes(normalizedSearch))
   );
 
   return (
@@ -73,14 +73,14 @@ export const ColaboradoresList = () => {
       {isLoading && <Loader />}
       <div className="mx-auto max-w-2xl text-center mb-25">
         <h2 className="text-4xl font-semibold tracking-tight app-heading sm:text-5xl">
-          Colaboradores
+          Candidatoes
         </h2>
         <p className="mt-2 text-lg text-gray-400">
-          Listagem de colaboradores registrados.
+          Listagem de candidatoes registrados.
         </p>
       </div>
       <div className="flex justify-between items-center mb-4">
-        <Link to="/colaboradores/novo" className="pio-btn-primary">Novo colaborador</Link>
+        <Link to="/candidatoes/novo" className="pio-btn-primary">Novo candidato</Link>
         <div className="w-1/3 ml-5">
           <input
             type="text"
@@ -112,20 +112,20 @@ export const ColaboradoresList = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredItems.map((colaborador) => (
-              <tr key={colaborador.id} className="bg-white border-b dark:bg-gray-800/50 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
+            {filteredItems.map((candidato) => (
+              <tr key={candidato.id} className="bg-white border-b dark:bg-gray-800/50 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600">
                 <th scope="row" className="px-6 py-4 font-medium dark:text-gray-900 whitespace-nowrap dark:text-white">
-                  {colaborador.nome}
+                  {candidato.nome}
                 </th>
                 <td className="px-6 py-4">
-                  {colaborador.email}
+                  {candidato.email}
                 </td>
                 <td className="px-6 py-4">
-                  {insertMaskInCPF(colaborador.cpf)} 
+                  {insertMaskInCPF(candidato.cpf)} 
                 </td>
                 <td className="px-6 py-4 flex gap-4">
-                  <Link to={`/colaboradores/${colaborador.id}`} className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Editar</Link>
-                  <button onClick={() => openDeleteModal(colaborador)} className="font-medium text-red-600 dark:text-red-500 hover:underline">Excluir</button>
+                  <Link to={`/candidatoes/${candidato.id}`} className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Editar</Link>
+                  <button onClick={() => openDeleteModal(candidato)} className="font-medium text-red-600 dark:text-red-500 hover:underline">Excluir</button>
                 </td>
               </tr>
             ))}
@@ -136,9 +136,9 @@ export const ColaboradoresList = () => {
         isOpen={isModalOpen}
         onClose={closeDeleteModal}
         onConfirm={handleDeleteConfirm}
-        title="Excluir Colaborador"
+        title="Excluir Candidato"
       >
-        <p>Você tem certeza que deseja excluir o colaborador <strong>{colaboradorToDelete?.nome}</strong>?</p>
+        <p>Você tem certeza que deseja excluir o candidato <strong>{candidatoToDelete?.nome}</strong>?</p>
         <p className="mt-2">Essa ação não poderá ser desfeita.</p>
       </Modal>
     </>
