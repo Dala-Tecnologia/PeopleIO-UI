@@ -78,9 +78,9 @@ export default function App() {
       <Header />
       <main className="flex-grow isolate px-6 py-24 sm:py-32 lg:px-8">
       <Routes>
-        <Route path="/" element={<Navigate to="/candidatoes" replace={true} />} />
-        <Route path="/candidatoes" element={<CandidatoesList/>} />
-        <Route path="/candidatoes/novo" element={<FormularioCandidato />} />
+        <Route path="/" element={<Navigate to="/candidatos" replace={true} />} />
+        <Route path="/candidatos" element={<CandidatoesList/>} />
+        <Route path="/candidatos/novo" element={<FormularioCandidato />} />
         <Route path="/loader" element={<Loader />} />
       </Routes>
       </main>

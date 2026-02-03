@@ -12,7 +12,7 @@ import { DocumentosForm } from "./DocumentosForm";
 import { EnderecoForm } from "./EnderecoForm";
 import { DocumentosOpcionaisForm } from "./DocumentosOpcionaisForm";
 import { useBlobUploader } from "@/hooks/useBlobUploader";
-import { candidatoesService } from "@/services/candidatoesService";
+import { candidatosService } from "@/services/candidatosService";
 import { useNotification } from "@/components/ui/NotificationContext";
 
 export const FormularioCandidato = () => {
@@ -133,10 +133,10 @@ export const FormularioCandidato = () => {
         arquivoCurriculo,
       };
 
-      await candidatoesService.create(payload);
+      await candidatosService.create(payload);
       setIsLoading(false);
       showNotification({ message: "Dados salvos com sucesso!", type: "success" });
-      navigate("/candidatoes");
+      navigate("/candidatos");
 
     } catch (error) {
       showNotification({ message: "Houve um problema ao tentar salvar os dados. Tente novamente.", type: "error" });

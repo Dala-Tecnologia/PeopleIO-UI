@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { candidatoesService } from "../../services/candidatoesService";
+import { candidatosService } from "../../services/candidatosService";
 import { Modal } from "@/components/ui/modal";
 import { Loader } from "../ui/loader";
 import { insertMaskInCPF } from "@/functions/cpf";
@@ -24,7 +24,7 @@ export const CandidatoesList = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const data = await candidatoesService.list();
+        const data = await candidatosService.list();
         setItems(data);
         setIsLoading(false);
       } catch (err: any) {
@@ -49,13 +49,13 @@ export const CandidatoesList = () => {
 
   const handleDeleteConfirm = async () => {
     if (candidatoToDelete) {
-      await candidatoesService.delete(candidatoToDelete.id);
+      await candidatosService.delete(candidatoToDelete.id);
       setItems(items.filter((c) => c.id !== candidatoToDelete.id));
       closeDeleteModal();
     }
   };
 
-  if (error) return <div className="text-red-500">Erro ao carregar candidatoes: {error}</div>;
+  if (error) return <div className="text-red-500">Erro ao carregar candidatos: {error}</div>;
 
   const normalizedSearch = searchQuery.toLowerCase();
   const numericSearch = searchQuery.replace(/\D/g, "");
@@ -76,11 +76,11 @@ export const CandidatoesList = () => {
           Candidatoes
         </h2>
         <p className="mt-2 text-lg text-gray-400">
-          Listagem de candidatoes registrados.
+          Listagem de candidatos registrados.
         </p>
       </div>
       <div className="flex justify-between items-center mb-4">
-        <Link to="/candidatoes/novo" className="pio-btn-primary">Novo candidato</Link>
+        <Link to="/candidatos/novo" className="pio-btn-primary">Novo candidato</Link>
         <div className="w-1/3 ml-5">
           <input
             type="text"
@@ -124,7 +124,7 @@ export const CandidatoesList = () => {
                   {insertMaskInCPF(candidato.cpf)} 
                 </td>
                 <td className="px-6 py-4 flex gap-4">
-                  <Link to={`/candidatoes/${candidato.id}`} className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Editar</Link>
+                  <Link to={`/candidatos/${candidato.id}`} className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Editar</Link>
                   <button onClick={() => openDeleteModal(candidato)} className="font-medium text-red-600 dark:text-red-500 hover:underline">Excluir</button>
                 </td>
               </tr>

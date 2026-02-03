@@ -1,30 +1,30 @@
 import { api } from "@/lib/api";
 import type { FormData } from "@/types/FormData";
 
-export const candidatoesService = {
+export const candidatosService = {
 
   create: async (payload: FormData) => {
-    const { data } = await api.post("/candidatoes", payload);
+    const { data } = await api.post("/candidatos", payload);
     return data;
   },
 
   update: async (id: string, payload: Partial<FormData>) => {
-    const { data } = await api.put(`/candidatoes/${id}`, payload);
+    const { data } = await api.put(`/candidatos/${id}`, payload);
     return data;
   },
 
   list: async () => {
-    const { data } = await api.get("/candidatoes");
+    const { data } = await api.get("/candidatos");
     return data.value;
   },
 
   getById: async (id: string) => {
-    const { data } = await api.get(`/candidatoes/${id}`);
+    const { data } = await api.get(`/candidatos/${id}`);
     return data;
   },
 
   delete: async (id: string) => {
-    const { data } = await api.delete(`/candidatoes/${id}`);
+    const { data } = await api.delete(`/candidatos/${id}`);
     return data;
   },
 };

@@ -75,13 +75,13 @@ const Header = () => {
 
         <nav className="flex-grow flex items-center justify-center space-x-6">
           <Link
-            to="/candidatoes"
+            to="/candidatos"
             className="hover:text-indigo-400 transition"
           >
             Candidatoes
           </Link>
           <Link
-            to="/candidatoes/novo"
+            to="/candidatos/novo"
             className="hover:text-indigo-400 transition"
           >
             Novo
