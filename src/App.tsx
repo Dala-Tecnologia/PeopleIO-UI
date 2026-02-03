@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import Header from '@/components/base/Header'
 import { FormularioCandidato } from './components/form/FormularioCandidatos'
 import { Routes, Route, Navigate } from "react-router-dom";
-import { CandidatoesList } from './components/candidato-list/candidato-list';
+import { CandidatosList } from './components/candidato-list/candidato-list';
 import { Loader } from './components/ui/loader';
 import { Notification } from './components/ui/Notification';
 import { NotificationContext } from './components/ui/NotificationContext';
@@ -79,7 +79,7 @@ export default function App() {
       <main className="flex-grow isolate px-6 py-24 sm:py-32 lg:px-8">
       <Routes>
         <Route path="/" element={<Navigate to="/candidatos" replace={true} />} />
-        <Route path="/candidatos" element={<CandidatoesList/>} />
+        <Route path="/candidatos" element={<CandidatosList/>} />
         <Route path="/candidatos/novo" element={<FormularioCandidato />} />
         <Route path="/loader" element={<Loader />} />
       </Routes>

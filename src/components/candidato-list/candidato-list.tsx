@@ -12,7 +12,7 @@ type Candidato = {
   email?: string;
 };
 
-export const CandidatoesList = () => {
+export const CandidatosList = () => {
   const [items, setItems] = useState<Candidato[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -73,7 +73,7 @@ export const CandidatoesList = () => {
       {isLoading && <Loader />}
       <div className="mx-auto max-w-2xl text-center mb-25">
         <h2 className="text-4xl font-semibold tracking-tight app-heading sm:text-5xl">
-          Candidatoes
+          Candidatos
         </h2>
         <p className="mt-2 text-lg text-gray-400">
           Listagem de candidatos registrados.

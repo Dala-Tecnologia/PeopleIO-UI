@@ -78,7 +78,7 @@ const Header = () => {
             to="/candidatos"
             className="hover:text-indigo-400 transition"
           >
-            Candidatoes
+            Candidatos
           </Link>
           <Link
             to="/candidatos/novo"
