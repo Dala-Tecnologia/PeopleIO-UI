@@ -13,6 +13,7 @@ import type { NotificationData } from './components/ui/NotificationContext';
 import { MsalProvider, AuthenticatedTemplate, UnauthenticatedTemplate } from "@azure/msal-react";
 import { PublicClientApplication, EventType } from "@azure/msal-browser";
 import { msalConfig } from './config/authConfig';
+import { CandidatoProfile } from './pages/candidato/CandidatoProfile';
 import { PortalLayout } from './pages/portal/PortalLayout';
 
 // Inicializa a instância do MSAL fora do componente para evitar recriação
@@ -81,6 +82,7 @@ export default function App() {
         <Route path="/" element={<Navigate to="/candidatos" replace={true} />} />
         <Route path="/candidatos" element={<CandidatoList/>} />
         <Route path="/candidato/novo" element={<FormularioCandidato />} />
+        <Route path="/candidato/:id" element={<CandidatoProfile />} />
         <Route path="/loader" element={<Loader />} />
       </Routes>
       </main>

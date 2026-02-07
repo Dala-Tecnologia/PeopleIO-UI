@@ -3,9 +3,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { candidatoSchema } from "@/components/schemas/candidatoSchema";
-
 import type { FormData, FormDataInput } from "@/types/FormData";
-
 import { Loader } from "@/components/ui/loader";
 import { DadosPessoaisForm } from "./DadosPessoaisForm";
 import { DocumentosForm } from "./DocumentosForm";
@@ -16,11 +14,13 @@ import { candidatoService } from "@/services/candidatoService";
 import { useNotification } from "@/components/ui/NotificationContext";
 
 export const FormularioCandidato = () => {
+  const [currentStep, setCurrentStep] = useState(0);
   const {
     control,
     register,
     handleSubmit,
     setValue,
+    trigger,
     formState: { errors },
   } = useForm<FormDataInput>({
     resolver: zodResolver(candidatoSchema as any),
@@ -71,7 +71,7 @@ export const FormularioCandidato = () => {
       arquivoCNH: null,
       arquivoCPF: null,
       arquivoComprovanteResidencia: null,
-      arquivoCurriculo: null
+      arquivoCurriculo: null,
     },
   });
 
@@ -88,19 +88,21 @@ export const FormularioCandidato = () => {
     cpf: string,
   ) {
     if (!file) return null;
-  
+
     const extension = file.name.split(".").pop();
     const filename = `${prefix}-${crypto.randomUUID()}-${nome}.${extension}`;
-  
-    const uploadFn = typeof uploader === "function" ? uploader
-      : uploader?.uploadFile ?? uploader?.upload;
-  
+
+    const uploadFn =
+      typeof uploader === "function"
+        ? uploader
+        : uploader?.uploadFile ?? uploader?.upload;
+
     if (!uploadFn) {
       throw new Error("Uploader não configurado corretamente");
     }
-  
+
     const url = await uploadFn(file, filename, cpf);
-  
+
     return {
       nomeArquivo: filename,
       url: url,
@@ -112,15 +114,35 @@ export const FormularioCandidato = () => {
   async function onSubmit(data: FormDataInput) {
     try {
       setIsLoading(true);
-      const arquivoRG = await processFile(data.arquivoRG, "RG", data.nome, data.cpf);
-      const arquivoCNH = await processFile(data.arquivoCNH, "CNH", data.nome, data.cpf);
-      const arquivoCPF = await processFile(data.arquivoCPF, "CPF", data.nome, data.cpf);
-      const arquivoCurriculo = await processFile(data.arquivoCurriculo, "Curriculo", data.nome, data.cpf);
+      const arquivoRG = await processFile(
+        data.arquivoRG,
+        "RG",
+        data.nome,
+        data.cpf,
+      );
+      const arquivoCNH = await processFile(
+        data.arquivoCNH,
+        "CNH",
+        data.nome,
+        data.cpf,
+      );
+      const arquivoCPF = await processFile(
+        data.arquivoCPF,
+        "CPF",
+        data.nome,
+        data.cpf,
+      );
+      const arquivoCurriculo = await processFile(
+        data.arquivoCurriculo,
+        "Curriculo",
+        data.nome,
+        data.cpf,
+      );
       const arquivoComprovanteResidencia = await processFile(
         data.arquivoComprovanteResidencia,
         "CR",
         data.nome,
-        data.cpf
+        data.cpf,
       );
 
       const payload: FormData = {
@@ -137,13 +159,77 @@ export const FormularioCandidato = () => {
       setIsLoading(false);
       showNotification({ message: "Dados salvos com sucesso!", type: "success" });
       navigate("/candidato");
-
     } catch (error) {
-      showNotification({ message: "Houve um problema ao tentar salvar os dados. Tente novamente.", type: "error" });
+      showNotification({
+        message: "Houve um problema ao tentar salvar os dados. Tente novamente.",
+        type: "error",
+      });
       console.error("Erro na submissão do formulário:", error);
       setIsLoading(false);
     }
   }
+
+  const steps = [
+    {
+      title: "Dados Pessoais",
+      fields: ["nome", "cpf", "dataNascimento", "email", "telefone"] as const,
+      component: (
+        <DadosPessoaisForm
+          register={register}
+          control={control}
+          errors={errors}
+        />
+      ),
+    },
+    {
+      title: "Endereço",
+      fields: ["endereco.cep", "endereco.rua", "endereco.numero", "endereco.bairro", "endereco.cidade", "endereco.estado"] as const,
+      component: (
+        <EnderecoForm
+          register={register}
+          control={control}
+          setValue={setValue}
+          errors={errors}
+        />
+      ),
+    },
+    {
+      title: "Documentação",
+      fields: ["identidadeNumero", "identidadeOrgaoEmissor", "identidadeUF", "identidadeDataEmissao", "ctpsNumero", "ctpsSerie", "ctpsDataEmissao", "ctpsuf"] as const,
+      component: (
+        <DocumentosForm
+          register={register}
+          control={control}
+          setValue={setValue}
+          errors={errors}
+        />
+      ),
+    },
+    {
+      title: "Documentação extra",
+      fields: [] as const,
+      component: (
+        <DocumentosOpcionaisForm
+          register={register}
+          control={control}
+          setValue={setValue}
+          errors={errors}
+        />
+      ),
+    },
+  ] as const;
+
+  const handleNext = async () => {
+    const fields = steps[currentStep].fields;
+    if (fields) {
+      const isValid = await trigger(fields);
+      if (isValid) {
+        setCurrentStep(currentStep + 1);
+      }
+    } else {
+      setCurrentStep(currentStep + 1);
+    }
+  };
 
   return (
     <>
@@ -161,50 +247,43 @@ export const FormularioCandidato = () => {
         className="mx-auto mt-16 max-w-3xl space-y-12 sm:mt-20"
         onSubmit={handleSubmit(onSubmit)}
       >
-        <section className="bg-gray-800/50 p-6 rounded-2xl shadow-xl">
-          <h3 className="text-xl font-semibold text-white mb-6">
-            Dados Pessoais
-          </h3>
-          <DadosPessoaisForm
-            register={register}
-            control={control}
-            errors={errors}
-          />
+        <section className="bg-blue-950 p-6 rounded-2xl shadow-xl">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-semibold text-white">
+              {steps[currentStep].title}
+            </h3>
+            <span className="text-gray-400">
+              Etapa {currentStep + 1} de {steps.length}
+            </span>
+          </div>
+          {steps[currentStep].component}
         </section>
 
-        <section className="bg-gray-800/50 p-6 rounded-2xl shadow-xl">
-          <h3 className="text-xl font-semibold text-white mb-6">Endereço</h3>
-          <EnderecoForm
-            register={register}
-            control={control}
-            setValue={setValue}
-            errors={errors}
-          />
-        </section>
-
-        <section className="bg-gray-800/50 p-6 rounded-2xl shadow-xl">
-          <h3 className="text-xl font-semibold text-white mb-6">Documentação</h3>
-          <DocumentosForm
-            register={register}
-            control={control}
-            setValue={setValue}
-            errors={errors}
-          />
-        </section>
-
-        <section className="bg-gray-800/50 p-6 rounded-2xl shadow-xl">
-          <h3 className="text-xl font-semibold text-white mb-6">Documentação extra</h3>
-          <DocumentosOpcionaisForm
-            register={register}
-            control={control}
-            setValue={setValue}
-            errors={errors}
-          />
-        </section>
-
-        <button type="submit" className="pio-btn-primary w-full text-lg">
-          Salvar
-        </button>
+        <div className="flex justify-between">
+          {currentStep > 0 && (
+            <button
+              type="button"
+              onClick={() => setCurrentStep(currentStep - 1)}
+              className="pio-btn-primary mr-1"
+            >
+              Anterior
+            </button>
+          )}
+          {currentStep < steps.length - 1 && (
+            <button
+              type="button"
+              onClick={handleNext}
+              className="pio-btn-primary ml-1"
+            >
+              Próximo
+            </button>
+          )}
+          {currentStep === steps.length - 1 && (
+            <button type="submit" className="pio-btn-primary w-full text-lg">
+              Salvar
+            </button>
+          )}
+        </div>
       </form>
     </>
   );
