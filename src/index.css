@@ -24,7 +24,7 @@
 }
 
 .pio-btn-primary{
-    @apply block w-full rounded-md bg-blue-950 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-blue-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500;
+    @apply block w-full rounded-md bg-blue-950 px-3.5 py-2.5 text-center text-sm font-semibold text-white shadow-xs hover:bg-blue-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500;
 }
 
 .pio-input[type="date"]::-webkit-calendar-picker-indicator {
@@ -69,9 +69,9 @@
     --color-sidebar-ring: var(--sidebar-ring);}
 
 :root {
-    --heading-color: #111827;
+    --heading-color: theme('colors.blue.950');
     --radius: 0.625rem;
-    --background: oklch(94.839% 0.01169 264.578);
+    --background: oklch(96.416% 0.00011 271.152);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
     --card-foreground: oklch(0.145 0 0);
@@ -105,8 +105,8 @@
 
 .dark {
     --heading-color: #ffffff;
-    --bg-primary: oklch(0.145 0 0);
-    --background: oklch(18.674% 0.00002 271.152);
+    --bg-primary: oklch(25.615% 0.00003 271.152);
+    --background: oklch(22.213% 0.00003 271.152);
     --foreground: oklch(0.985 0 0);
     --card: oklch(0.205 0 0);
     --card-foreground: oklch(0.985 0 0);

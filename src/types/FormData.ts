@@ -6,6 +6,7 @@ export type Arquivo = {
 };
 
 export type FormData = {
+  fotoUrl?: string;
   nome: string;
   nomeSocial: string | null;
   cpf: string;
