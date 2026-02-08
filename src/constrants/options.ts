@@ -44,6 +44,39 @@ export const corRacaOptions = [
     "Não Informado"
 ]
 
+export const profissõesOptions = [
+    "Desenvolvedor de Software",
+    "Analista de Dados",
+    "Gerente de Projetos",
+    "Designer Gráfico",
+    "Engenheiro de Software",
+    "Especialista em Marketing Digital",
+    "Analista Financeiro",
+    "Consultor de Recursos Humanos",
+    "Médico",
+    "Advogado",
+    "Professor",
+    "Psicólogo",
+    "Arquiteto",
+    "Engenheiro Civil",
+    "Enfermeiro",
+    "Farmacêutico",
+    "Jornalista",
+    "Publicitário",
+    "Cientista de Dados",
+    "Analista de Suporte Técnico",
+    "Assistente Administrativo",
+    "Vendedor",
+    "Atendente de Loja",
+    "Motorista", //Crição de sistema para CNH obrigatoria
+    "Cozinheiro",
+    "Garçom",
+    "Recepcionista",
+    "Segurança",
+    "Limpeza",
+    "Outro" 
+]
+
 export const cnhTipo = [
     "A",
     "B",
