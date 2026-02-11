@@ -72,7 +72,7 @@ export const CandidatoData = ({ candidato }: CandidatoDataProps) => {
       <div className="flex justify-end gap-2">
         {!editing && (
           <button
-            className="px-3 py-1 bg-blue-600 rounded text-white"
+            className="px-3 py-1 bg-blue-950 rounded text-white"
             onClick={() => setEditing(true)}
           >
             Editar
@@ -80,7 +80,7 @@ export const CandidatoData = ({ candidato }: CandidatoDataProps) => {
         )}
         {editing && (
           <>
-            <button className="px-3 py-1 bg-blue-900 rounded text-white" onClick={handleSave}>
+            <button className="px-3 py-1 bg-blue-950 rounded text-white" onClick={handleSave}>
               Atualizar
             </button>
             <button className="px-3 py-1 bg-red-600 rounded text-white" onClick={handleCancel}>
