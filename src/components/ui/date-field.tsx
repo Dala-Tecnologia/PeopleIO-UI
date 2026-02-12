@@ -1,10 +1,11 @@
 import { Controller, type Control, type FieldError, type FieldValues, type Path } from "react-hook-form";
 import { DatePicker } from "@/components/ui/datepicker";
+import type { ReactNode } from "react";
 
 type DateFieldProps<T extends FieldValues> = {
   control: Control<T>;
   name: Path<T>;
-  label: string;
+  label: ReactNode;
   error?: FieldError;
 };
 

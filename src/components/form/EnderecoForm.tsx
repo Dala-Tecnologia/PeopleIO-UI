@@ -50,7 +50,7 @@ export const EnderecoForm = ({ register, setValue, control, errors }: EnderecoFo
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
       <InputField
-        label="CEP"
+        label={<span>CEP <span className="text-red-500">*</span></span>}
         {...register("endereco.cep")}
         placeholder="00000-000"
         error={errors.endereco?.cep}
@@ -63,27 +63,27 @@ export const EnderecoForm = ({ register, setValue, control, errors }: EnderecoFo
       )}
 
       <InputField
-        label="Rua"
+        label={<span>Rua <span className="text-red-500">*</span></span>}
         {...register("endereco.rua")}
         placeholder="Avenida Rio Branco"
         error={errors.endereco?.rua}
       />
 
       <InputField
-        label="Número"
+        label={<span>Número <span className="text-red-500">*</span></span>}
         {...register("endereco.numero")}
         error={errors.endereco?.numero}
         mask={somenteNumerosMascara}
       />
 
       <InputField
-        label="Bairro"
+        label={<span>Bairro <span className="text-red-500">*</span></span>}
         {...register("endereco.bairro")}
         error={errors.endereco?.bairro}
       />
 
       <InputField
-        label="Cidade"
+        label={<span>Cidade <span className="text-red-500">*</span></span>}
         {...register("endereco.cidade")}
         error={errors.endereco?.cidade}
       />
@@ -91,7 +91,7 @@ export const EnderecoForm = ({ register, setValue, control, errors }: EnderecoFo
       <SelectField
         control={control}
         name="endereco.estado"
-        label="Estado"
+        label={<span>Estado <span className="text-red-500">*</span></span>}
         options={estadosOptions}
       />
     </div>

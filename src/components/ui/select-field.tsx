@@ -1,4 +1,5 @@
 import { Controller, type Control, type FieldValues, type Path } from "react-hook-form";
+import type { ReactNode } from "react";
 import {
   Select,
   SelectTrigger,
@@ -10,7 +11,7 @@ import {
 type SelectFieldProps<T extends FieldValues,> = {
   control: Control<T>;
   name: Path<T>;
-  label: string;
+  label: ReactNode;
   placeholder?: string;
   options: string[];
   className?: string;

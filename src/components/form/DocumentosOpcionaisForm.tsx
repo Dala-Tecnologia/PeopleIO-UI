@@ -24,7 +24,7 @@ export const DocumentosOpcionaisForm = ({ register, control, setValue, errors }:
         <>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <InputField
-                    label="Titulo de Eleitor - Número"
+                    label={<span>Titulo de Eleitor - Número <span className="text-red-500">*</span></span>}
                     {...register("tituloEleitor")}
                     mask={somenteNumerosMascara}
                     error={errors.tituloEleitor}
@@ -34,18 +34,18 @@ export const DocumentosOpcionaisForm = ({ register, control, setValue, errors }:
                     control={control}
                     {...register("tituloUF")}
                     name="tituloUF"
-                    label="Titulo de Eleitor - UF"
+                    label={<span>Titulo de Eleitor - UF <span className="text-red-500">*</span></span>}
                     options={estadosOptions}
                 />
 
                 <InputField
-                    label="Titulo de Eleitor - Zona"
+                    label={<span>Titulo de Eleitor - Zona <span className="text-red-500">*</span></span>}
                     {...register("tituloZona")}
                     error={errors.tituloZona}
                 />
 
                 <InputField
-                    label="Titulo de Eleitor - Seção"
+                    label={<span>Titulo de Eleitor - Seção <span className="text-red-500">*</span></span>}
                     {...register("tituloSecao")}
                     error={errors.tituloSecao}
                 />
