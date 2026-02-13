@@ -86,6 +86,13 @@ export const DocumentosOpcionaisForm = ({ register, control, setValue, errors }:
                     options={cnhTipo}
                 />
 
+                <SelectField<FormDataInput>
+                    control={control}
+                    {...register("profissaoOption")} // criar a profissaoOption
+                    name="profissaoOption"
+                    label="Profissões"
+                    options={profissoesOptions}
+                />
 
             </div>
             <h3 className="text-xl font-semibold text-white my-6 text-center">Anexos</h3>
