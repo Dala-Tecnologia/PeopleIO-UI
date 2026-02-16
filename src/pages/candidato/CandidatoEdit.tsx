@@ -2,9 +2,12 @@ import { useState } from "react";
 import type { FormData } from "@/types/FormData";
 import { formatDateBROnly } from "@/functions/formatDate";
 import { useBlobUploader } from "@/hooks/useBlobUploader";
+import { candidatoService } from "@/services/candidatoService";
+import { cleanFormData } from "@/lib/cleanFormData";
 
 interface CandidatoDataProps {
   candidato: FormData;
+  candidatoId?: string;
 }
 
 const DataField = ({
@@ -43,12 +46,14 @@ const DataField = ({
   );
 };
 
-export const CandidatoData = ({ candidato }: CandidatoDataProps) => {
+export const CandidatoData = ({ candidato, candidatoId }: CandidatoDataProps) => {
   const [editing, setEditing] = useState(false);
   const [local, setLocal] = useState<FormData>(candidato);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(candidato.fotoUrl?.url || null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const { uploadFile } = useBlobUploader();
 
   const setNestedValue = (obj: any, path: string, value: any) => {
@@ -111,10 +116,29 @@ export const CandidatoData = ({ candidato }: CandidatoDataProps) => {
     }
   };
 
-  const handleSave = () => {
-    console.log("Saved candidate (local state):", local);
-    setEditing(false);
-    setPhotoFile(null);
+  const handleSave = async () => {
+    if (!candidatoId) {
+      setSaveError("ID do candidato não encontrado");
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveError(null);
+
+    try {
+      const cleanedData = cleanFormData(local);
+      await candidatoService.update(candidatoId, cleanedData);
+      console.log("Candidato atualizado com sucesso:", cleanedData);
+      setEditing(false);
+      setPhotoFile(null);
+    } catch (error) {
+      console.error("Erro ao salvar candidato:", error);
+      setSaveError(
+        error instanceof Error ? error.message : "Erro ao salvar as alterações. Tente novamente."
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleCancel = () => {
@@ -122,29 +146,45 @@ export const CandidatoData = ({ candidato }: CandidatoDataProps) => {
     setEditing(false);
     setPhotoFile(null);
     setPhotoPreview(candidato.fotoUrl?.url || null);
+    setSaveError(null);
   };
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-end gap-2">
-        {!editing && (
-          <button
-            className="px-3 py-1 bg-blue-950 rounded text-white"
-            onClick={() => setEditing(true)}
-          >
-            Editar
-          </button>
+      <div className="flex flex-col gap-2">
+        {saveError && (
+          <div className="px-4 py-3 bg-red-900/50 border border-red-600 rounded text-red-100 text-sm">
+            {saveError}
+          </div>
         )}
-        {editing && (
-          <>
-            <button className="px-3 py-1 bg-blue-950 rounded text-white" onClick={handleSave}>
-              Atualizar
+        <div className="flex justify-end gap-2">
+          {!editing && (
+            <button
+              className="px-3 py-1 bg-blue-950 rounded text-white hover:bg-blue-900 disabled:opacity-50"
+              onClick={() => setEditing(true)}
+            >
+              Editar
             </button>
-            <button className="px-3 py-1 bg-red-600 rounded text-white" onClick={handleCancel}>
-              Cancelar
-            </button>
-          </>
-        )}
+          )}
+          {editing && (
+            <>
+              <button
+                className="px-3 py-1 bg-blue-950 rounded text-white hover:bg-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleSave}
+                disabled={isSaving}
+              >
+                {isSaving ? "Salvando..." : "Atualizar"}
+              </button>
+              <button
+                className="px-3 py-1 bg-red-600 rounded text-white hover:bg-red-700 disabled:opacity-50"
+                onClick={handleCancel}
+                disabled={isSaving}
+              >
+                Cancelar
+              </button>
+            </>
+          )}
+        </div>
       </div>
       {/* Foto de Perfil */}
       <section className="bg-gray-800/50 p-6 rounded-lg">

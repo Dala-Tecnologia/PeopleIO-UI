@@ -54,7 +54,7 @@ export const CandidatoProfile = () => {
             <h3 className="text-xl font-semibold text-white mb-6">
               Dados do Candidato
             </h3>
-            <CandidatoData candidato={candidato} />
+            <CandidatoData candidato={candidato} candidatoId={id} />
           </div>
         </div>
       </div>
