@@ -4,7 +4,7 @@ import { candidatoService } from "@/services/candidatoService";
 import type { FormData } from "@/types/FormData";
 import { Loader } from "@/components/ui/loader";
 
-import { CandidatoData } from "./CandidatoData";
+import { CandidatoData } from "./CandidatoEdit";
 
 export const CandidatoProfile = () => {
   const { id } = useParams<{ id: string }>();
@@ -40,8 +40,8 @@ export const CandidatoProfile = () => {
         <div className="md:col-span-1">
           <div className="bg-gray-800/50 p-6 rounded-2xl shadow-xl text-center">
             <img
-              className="w-32 h-32 rounded-full mx-auto mb-4"
-              src={'https://via.placeholder.com/150'}
+              className="w-32 h-32 rounded-full mx-auto mb-4 object-cover"
+              src={candidato.fotoUrl?.url || 'https://via.placeholder.com/150'}
               alt="Foto do Candidato"
             />
             <h2 className="text-2xl font-semibold text-white">{candidato.nome}</h2>

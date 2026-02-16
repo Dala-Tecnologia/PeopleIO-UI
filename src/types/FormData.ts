@@ -6,7 +6,7 @@ export type Arquivo = {
 };
 
 export type FormData = {
-  fotoUrl?: string;
+  fotoUrl: Arquivo | null;
   nome: string;
   nomeSocial: string | null;
   cpf: string;
@@ -27,7 +27,7 @@ export type FormData = {
   identidadeNumero: string;
   identidadeOrgaoEmissor: string;
   identidadeUF: string;
-  identidadeDataEmissao: string;
+  identidadeDataEmissao: string | null;
   ctpsNumero: string;
   ctpsSerie: string;
   ctpsDataEmissao: string;
@@ -48,6 +48,7 @@ export type FormData = {
   estadoCivil: string;
   naturalidade: string;
   nacionalidade: string;
+  profissaoOption: string | null;
   arquivoRG: Arquivo | null;
   arquivoCNH: Arquivo | null;
   arquivoCPF: Arquivo | null;
@@ -57,12 +58,12 @@ export type FormData = {
 
 export type FormDataInput = Omit<
   FormData,
-  "arquivoRG" | "arquivoCNH" | "arquivoCPF" | "arquivoComprovanteResidencia" | "arquivoCurriculo"
+  "arquivoRG" | "arquivoCNH" | "arquivoCPF" | "arquivoComprovanteResidencia" | "arquivoCurriculo" | "fotoUrl"
 > & {
   arquivoRG: File | null;
   arquivoCNH: File | null;
   arquivoCPF: File | null;
   arquivoComprovanteResidencia: File | null;
   arquivoCurriculo: File | null;
-
+  fotoUrl: File | null;
 };

@@ -6,7 +6,7 @@ import type {
 } from "react-hook-form";
 import type { FormDataInput } from "@/types/FormData";
 import { FileUpload } from "@/components/FileUpload";
-import { cnhTipo, estadosOptions } from "@/constrants/options";
+import { cnhTipo, estadosOptions, profissoesOptions } from "@/constrants/options";
 import { SelectField } from "../ui/select-field";
 import { InputField } from "../ui/InputField";
 import { DateField } from "../ui/date-field";
@@ -45,7 +45,7 @@ export const DocumentosOpcionaisForm = ({ register, control, setValue, errors }:
                 />
 
                 <InputField
-                    label={<span>Titulo de Eleitor - Seção <span className="text-red-500">*</span></span>}
+                    label="Titulo de Eleitor - Seção"
                     {...register("tituloSecao")}
                     error={errors.tituloSecao}
                 />
@@ -88,7 +88,7 @@ export const DocumentosOpcionaisForm = ({ register, control, setValue, errors }:
 
                 <SelectField<FormDataInput>
                     control={control}
-                    {...register("profissaoOption")} // criar a profissaoOption
+                    {...register("profissaoOption")}
                     name="profissaoOption"
                     label="Profissões"
                     options={profissoesOptions}

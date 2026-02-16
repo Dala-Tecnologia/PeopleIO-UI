@@ -46,7 +46,7 @@ export const FormularioCandidato = () => {
       identidadeNumero: "",
       identidadeOrgaoEmissor: "",
       identidadeUF: "",
-      identidadeDataEmissao: "",
+      identidadeDataEmissao: null,
       ctpsNumero: "",
       ctpsSerie: "",
       ctpsDataEmissao: "",
@@ -67,11 +67,13 @@ export const FormularioCandidato = () => {
       estadoCivil: "",
       naturalidade: "",
       nacionalidade: "",
+      profissaoOption: null,
       arquivoRG: null,
       arquivoCNH: null,
       arquivoCPF: null,
       arquivoComprovanteResidencia: null,
       arquivoCurriculo: null,
+      fotoUrl: null,
     },
   });
 
@@ -87,33 +89,47 @@ export const FormularioCandidato = () => {
     nome: string,
     cpf: string,
   ) {
-    if (!file) return null;
-
-    const extension = file.name.split(".").pop();
-    const filename = `${prefix}-${crypto.randomUUID()}-${nome}.${extension}`;
-
-    const uploadFn =
-      typeof uploader === "function"
-        ? uploader
-        : uploader?.uploadFile ?? uploader?.upload;
-
-    if (!uploadFn) {
-      throw new Error("Uploader não configurado corretamente");
+    if (!file) {
+      console.log(`[processFile] Arquivo ${prefix} é null, pulando upload`);
+      return null;
     }
 
-    const url = await uploadFn(file, filename, cpf);
+    try {
+      console.log(`[processFile] Iniciando upload de ${prefix}: ${file.name}`);
+      
+      const extension = file.name.split(".").pop();
+      const filename = `${prefix}-${crypto.randomUUID()}-${nome}.${extension}`;
 
-    return {
-      nomeArquivo: filename,
-      url: url,
-      tipoMime: file.type,
-      dataUpload: new Date().toISOString(),
-    };
+      const uploadFn =
+        typeof uploader === "function"
+          ? uploader
+          : uploader?.uploadFile ?? uploader?.upload;
+
+      if (!uploadFn) {
+        throw new Error("Uploader não configurado corretamente");
+      }
+
+      const url = await uploadFn(file, filename, cpf);
+      
+      console.log(`[processFile] Upload de ${prefix} concluído: ${url}`);
+
+      return {
+        nomeArquivo: filename,
+        url: url,
+        tipoMime: file.type,
+        dataUpload: new Date().toISOString(),
+      };
+    } catch (error) {
+      console.error(`[processFile] Erro ao fazer upload de ${prefix}:`, error);
+      throw error;
+    }
   }
 
   async function onSubmit(data: FormDataInput) {
     try {
       setIsLoading(true);
+      console.log("Iniciando submissão do formulário...", data);
+      
       const arquivoRG = await processFile(
         data.arquivoRG,
         "RG",
@@ -144,27 +160,38 @@ export const FormularioCandidato = () => {
         data.nome,
         data.cpf,
       );
+      const fotoUrl = await processFile(
+        data.fotoUrl,
+        "Foto",
+        data.nome,
+        data.cpf,
+      );
 
       const payload: FormData = {
         ...data,
         cnhDataVencimento: data.cnhDataVencimento || null,
+        profissaoOption: data.profissaoOption || null,
         arquivoRG,
         arquivoCNH,
         arquivoCPF,
         arquivoComprovanteResidencia,
         arquivoCurriculo,
+        fotoUrl,
       };
 
+      console.log("Payload sendo enviado:", payload);
+      
       await candidatoService.create(payload);
       setIsLoading(false);
       showNotification({ message: "Dados salvos com sucesso!", type: "success" });
       navigate("/candidato");
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("Erro completo na submissão:", errorMessage, error);
       showNotification({
-        message: "Houve um problema ao tentar salvar os dados. Tente novamente.",
+        message: `Erro: ${errorMessage || "Houve um problema ao tentar salvar os dados. Tente novamente."}`,
         type: "error",
       });
-      console.error("Erro na submissão do formulário:", error);
       setIsLoading(false);
     }
   }
@@ -177,6 +204,7 @@ export const FormularioCandidato = () => {
         <DadosPessoaisForm
           register={register}
           control={control}
+          setValue={setValue}
           errors={errors}
         />
       ),
