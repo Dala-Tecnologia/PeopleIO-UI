@@ -1,9 +1,5 @@
 name: Azure Static Web Apps CI/CD
 
-permissions:
-  contents: write
-  id-token: write
-
 on:
   push:
     branches:
@@ -19,11 +15,17 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      
+      - name: Clean git config
+        run: |
+          git config --global --remove-section http.https://github.com/ || true
+          git config --local --remove-section http.https://github.com/ || true
+      
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: '20'
+          node-version: '20' # força versão compatível
       - name: Install dependencies
         run: npm install
       - name: Build
