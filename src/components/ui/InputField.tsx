@@ -2,7 +2,7 @@ import React from "react";
 import type { FieldError } from "react-hook-form";
 
 type InputFieldProps = React.InputHTMLAttributes<HTMLInputElement> & {
-  label: string;
+  label: React.ReactNode;
   error?: FieldError;
   mask?: (value: string) => string;
 };

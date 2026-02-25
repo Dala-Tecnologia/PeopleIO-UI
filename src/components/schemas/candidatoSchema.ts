@@ -67,7 +67,7 @@ export const candidatoSchema = z.object({
   identidadeUF: z
     .string(),
   identidadeDataEmissao: z
-    .string(),
+    .string().nullable(),
 
   ctpsNumero: z
     .string()
@@ -83,24 +83,19 @@ export const candidatoSchema = z.object({
     .min(1, { message: "O campo Data de Emissão da CTPS é obrigatório." }),
   
   ctpsuf: z
-    .string()
-    .min(2, { message: "O campo UF da CTPS é obrigatório." }),
+    .string(),
 
   tituloEleitor: z
-    .string()
-    .min(1, { message: "O campo Título de Eleitor é obrigatório." }),
+    .string(),
   /* tituloDataEmissao: z
     .string()
     .min(1, { message: "O campo Data de Emissão do Título é obrigatório." }), */
   tituloUF: z
-    .string()
-    .min(2, { message: "O campo UF do Título é obrigatório." }),
+    .string(),
   tituloZona: z
-    .string()
-    .min(1, { message: "O campo Zona Eleitoral é obrigatório." }),
+    .string(),
   tituloSecao: z
-    .string()
-    .min(1, { message: "O campo Seção Eleitoral é obrigatório." }),
+    .string(),
 
   cnhNumero: z
     .string()
@@ -142,8 +137,26 @@ export const candidatoSchema = z.object({
     .regex(/^[A-Za-zÀ-ú\s]+$/, {
       message: "Nacionalidade deve conter apenas letras.",
     }),
+  profissaoOption: z
+    .string()
+    .nullable(),
+  fotoUrl: arquivoSchema,
   arquivoRG: arquivoSchema,
   arquivoCNH: arquivoSchema,
   arquivoCPF: arquivoSchema,
   arquivoComprovanteResidencia: arquivoSchema,
-});
+  arquivoCurriculo: arquivoSchema,
+}).refine(
+  (data) => {
+    // Se a profissão for Motorista, CNH é obrigatória
+    if (data.profissaoOption === "Motorista") {
+      const cnhValue = data.cnhNumero ? data.cnhNumero.toString().trim() : "";
+      return cnhValue.length > 0;
+    }
+    return true;
+  },
+  {
+    message: "CNH é obrigatória quando a profissão é Motorista.",
+    path: ["cnhNumero"],
+  }
+);

@@ -6,7 +6,7 @@ import type {
 } from "react-hook-form";
 import type { FormDataInput } from "@/types/FormData";
 import { FileUpload } from "@/components/FileUpload";
-import { cnhTipo, estadosOptions } from "@/constrants/options";
+import { cnhTipo, estadosOptions, profissoesOptions } from "@/constrants/options";
 import { SelectField } from "../ui/select-field";
 import { InputField } from "../ui/InputField";
 import { DateField } from "../ui/date-field";
@@ -24,7 +24,7 @@ export const DocumentosOpcionaisForm = ({ register, control, setValue, errors }:
         <>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <InputField
-                    label="Titulo de Eleitor - Número"
+                    label={<span>Titulo de Eleitor - Número <span className="text-red-500">*</span></span>}
                     {...register("tituloEleitor")}
                     mask={somenteNumerosMascara}
                     error={errors.tituloEleitor}
@@ -34,12 +34,12 @@ export const DocumentosOpcionaisForm = ({ register, control, setValue, errors }:
                     control={control}
                     {...register("tituloUF")}
                     name="tituloUF"
-                    label="Titulo de Eleitor - UF"
+                    label={<span>Titulo de Eleitor - UF <span className="text-red-500">*</span></span>}
                     options={estadosOptions}
                 />
 
                 <InputField
-                    label="Titulo de Eleitor - Zona"
+                    label={<span>Titulo de Eleitor - Zona <span className="text-red-500">*</span></span>}
                     {...register("tituloZona")}
                     error={errors.tituloZona}
                 />
@@ -86,6 +86,13 @@ export const DocumentosOpcionaisForm = ({ register, control, setValue, errors }:
                     options={cnhTipo}
                 />
 
+                <SelectField<FormDataInput>
+                    control={control}
+                    {...register("profissaoOption")}
+                    name="profissaoOption"
+                    label="Profissões"
+                    options={profissoesOptions}
+                />
 
             </div>
             <h3 className="text-xl font-semibold text-white my-6 text-center">Anexos</h3>

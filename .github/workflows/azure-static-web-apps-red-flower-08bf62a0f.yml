@@ -15,7 +15,13 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+      
+      - name: Clean git config
+        run: |
+          git config --global --remove-section http.https://github.com/ || true
+          git config --local --remove-section http.https://github.com/ || true
+      
       - name: Setup Node
         uses: actions/setup-node@v3
         with:

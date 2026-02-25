@@ -1,9 +1,10 @@
-import type { Control, UseFormRegister, FieldErrors } from "react-hook-form";
+import type { Control, UseFormRegister, UseFormSetValue, FieldErrors } from "react-hook-form";
 import type { FormDataInput } from "@/types/FormData";
 import { insertMaskInCPF } from "@/functions/cpf";
 import { insertMaskInPhone } from "@/functions/phone";
 import { InputField } from "../ui/InputField";
 import { SelectField } from "../ui/select-field";
+import { FileUpload } from "@/components/FileUpload";
 import {
   corRacaOptions,
   escolaridadeOptions,
@@ -15,18 +16,27 @@ import { DateField } from "../ui/date-field";
 interface DadosPessoaisFormProps {
   register: UseFormRegister<FormDataInput>;
   control: Control<FormDataInput>;
+  setValue: UseFormSetValue<FormDataInput>;
   errors: FieldErrors<FormDataInput>;
 }
 
 
-export const DadosPessoaisForm = ({ register, control, errors }: DadosPessoaisFormProps) => {
+export const DadosPessoaisForm = ({ register, control, setValue, errors }: DadosPessoaisFormProps) => {
   return (
-    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-      <InputField
-        label="Nome completo"
-        {...register("nome")}
-        error={errors.nome}
-      />
+    <>
+      <div className="mb-6">
+        <FileUpload
+          label="Foto de Perfil"
+          onSelected={(file) => setValue("fotoUrl", file)}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <InputField
+          label={<span>Nome completo <span className="text-red-500">*</span></span>}
+          {...register("nome")}
+          error={errors.nome}
+        />
 
       <InputField
         label="Nome Social"
@@ -35,7 +45,7 @@ export const DadosPessoaisForm = ({ register, control, errors }: DadosPessoaisFo
       />
 
       <InputField
-        label="CPF"
+        label={<span>CPF <span className="text-red-500">*</span></span>}
         {...register("cpf")}
         mask={insertMaskInCPF}
         error={errors.cpf}
@@ -44,17 +54,17 @@ export const DadosPessoaisForm = ({ register, control, errors }: DadosPessoaisFo
       <DateField
         control={control}
         name="dataNascimento"
-        label="Data de Nascimento"
+        label={<span>Data de Nascimento <span className="text-red-500">*</span></span>}
         error={errors.dataNascimento}
       />
 
       <InputField
-        label="E-mail"
+        label={<span>E-mail <span className="text-red-500">*</span></span>}
         {...register("email")}
         error={errors.email} />
 
       <InputField
-        label="Telefone"
+        label={<span>Telefone <span className="text-red-500">*</span></span>}
         {...register("telefone")}
         mask={insertMaskInPhone}
         error={errors.telefone}
@@ -63,42 +73,43 @@ export const DadosPessoaisForm = ({ register, control, errors }: DadosPessoaisFo
       <SelectField<FormDataInput>
         control={control}
         name="sexo"
-        label="Sexo"
+        label={<span>Sexo <span className="text-red-500">*</span></span>}
         options={sexoOptions}
       />
 
       <SelectField
         control={control}
         name="corRaca"
-        label="Cor/Raça"
+        label={<span>Cor/Raça <span className="text-red-500">*</span></span>}
         options={corRacaOptions}
       />
 
       <SelectField
         control={control}
         name="escolaridade"
-        label="Escolaridade"
+        label={<span>Escolaridade <span className="text-red-500">*</span></span>}
         options={escolaridadeOptions}
       />
 
       <SelectField
         control={control}
         name="estadoCivil"
-        label="Estado Civil"
+        label={<span>Estado Civil <span className="text-red-500">*</span></span>}
         options={estadoCivilOptions}
       />
 
       <InputField
-        label="Nacionalidade"
+        label={<span>Nacionalidade <span className="text-red-500">*</span></span>}
         {...register("nacionalidade")}
         error={errors.nacionalidade}
       />
 
       <InputField
-        label="Naturalidade"
+        label={<span>Naturalidade <span className="text-red-500">*</span></span>}
         {...register("naturalidade")}
         error={errors.naturalidade}
       />
-    </div>
+      </div>
+    </>
   );
 };

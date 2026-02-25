@@ -49,14 +49,14 @@ export const DocumentosForm = ({ register, control, errors }: DocumentosFormProp
       />
 
       <InputField
-        label="CTPS - Número"
+        label={<span>CTPS - Número <span className="text-red-500">*</span></span>}
         {...register("ctpsNumero")}
         error={errors.ctpsNumero}
         mask={somenteNumerosMascara}
       />
 
       <InputField
-        label="CTPS - Série"
+        label={<span>CTPS - Série <span className="text-red-500">*</span></span>}
         {...register("ctpsSerie")}
         error={errors.ctpsSerie}
       />
@@ -64,7 +64,7 @@ export const DocumentosForm = ({ register, control, errors }: DocumentosFormProp
       <DateField
         control={control}
         name="ctpsDataEmissao"
-        label="CTPS - Data de Emissão "
+        label={<span>CTPS - Data de Emissão <span className="text-red-500">*</span></span>}
         error={errors.ctpsDataEmissao}
       />
 
@@ -72,7 +72,7 @@ export const DocumentosForm = ({ register, control, errors }: DocumentosFormProp
         control={control}
         {...register("ctpsuf")}
         name="ctpsuf"
-        label="CTPS UF"
+        label={<span>CTPS - UF <span className="text-red-500">*</span></span>}
         options={estadosOptions}
       />
     </div>
