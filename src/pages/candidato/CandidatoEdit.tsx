@@ -54,6 +54,20 @@ export const CandidatoData = ({ candidato, candidatoId }: CandidatoDataProps) =>
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  
+  // Estados para os anexos
+  const [arquivoRGFile, setArquivoRGFile] = useState<File | null>(null);
+  const [arquivoCNHFile, setArquivoCNHFile] = useState<File | null>(null);
+  const [arquivoCPFFile, setArquivoCPFFile] = useState<File | null>(null);
+  const [arquivoComprovanteFile, setArquivoComprovanteFile] = useState<File | null>(null);
+  const [arquivoCurriculoFile, setArquivoCurriculoFile] = useState<File | null>(null);
+  
+  const [uploadingRG, setUploadingRG] = useState(false);
+  const [uploadingCNH, setUploadingCNH] = useState(false);
+  const [uploadingCPF, setUploadingCPF] = useState(false);
+  const [uploadingComprovante, setUploadingComprovante] = useState(false);
+  const [uploadingCurriculo, setUploadingCurriculo] = useState(false);
+  
   const { uploadFile } = useBlobUploader();
 
   const setNestedValue = (obj: any, path: string, value: any) => {
@@ -116,6 +130,43 @@ export const CandidatoData = ({ candidato, candidatoId }: CandidatoDataProps) =>
     }
   };
 
+  // Funções de upload para anexos
+  const handleFileUpload = async (
+    file: File | null,
+    prefix: string,
+    fieldName: keyof FormData,
+    setUploading: (value: boolean) => void,
+    setFile: (value: File | null) => void
+  ) => {
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const filename = `${prefix}-${Date.now()}.${file.name.split(".").pop()}`;
+      const remotePath = await uploadFile(file, filename, local.cpf);
+
+      const newArquivo = {
+        nomeArquivo: file.name,
+        url: remotePath,
+        tipoMime: file.type,
+        dataUpload: new Date().toISOString(),
+      };
+
+      setLocal((prev) => ({
+        ...prev,
+        [fieldName]: newArquivo,
+      }));
+
+      setFile(null);
+      console.log(`${prefix} atualizado com sucesso`);
+    } catch (error) {
+      console.error(`Erro ao fazer upload do ${prefix}:`, error);
+      alert(`Erro ao fazer upload do ${prefix}. Tente novamente.`);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!candidatoId) {
       setSaveError("ID do candidato não encontrado");
@@ -147,6 +198,13 @@ export const CandidatoData = ({ candidato, candidatoId }: CandidatoDataProps) =>
     setPhotoFile(null);
     setPhotoPreview(candidato.fotoUrl?.url || null);
     setSaveError(null);
+    
+    // Limpar estados dos anexos
+    setArquivoRGFile(null);
+    setArquivoCNHFile(null);
+    setArquivoCPFFile(null);
+    setArquivoComprovanteFile(null);
+    setArquivoCurriculoFile(null);
   };
 
   return (
@@ -292,6 +350,237 @@ export const CandidatoData = ({ candidato, candidatoId }: CandidatoDataProps) =>
           <DataField label="CNH - Data de Vencimento" value={local.cnhDataVencimento} name="cnhDataVencimento" editable={editing} onChange={handleFieldChange} isDate={true} />
           <DataField label="CNH - Órgão Emissor" value={local.cnhOrgaoEmissor} name="cnhOrgaoEmissor" editable={editing} onChange={handleFieldChange} />
           <DataField label="CNH - Tipo" value={local.cnhTipo} name="cnhTipo" editable={editing} onChange={handleFieldChange} />
+        </div>
+      </section>
+
+      {/* Anexos */}
+      <section>
+        <h4 className="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-2">Anexos</h4>
+        <div className="space-y-6">
+          {/* RG */}
+          <div className="bg-gray-800/50 p-4 rounded-lg">
+            <h5 className="text-md font-semibold text-white mb-3">RG</h5>
+            <div className="space-y-2">
+              {local.arquivoRG && (
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-gray-400">Arquivo atual:</span>
+                  <a 
+                    href={local.arquivoRG.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 underline truncate max-w-xs"
+                  >
+                    {local.arquivoRG.nomeArquivo}
+                  </a>
+                </div>
+              )}
+              {editing && (
+                <div className="space-y-2">
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => setArquivoRGFile(e.target.files?.[0] || null)}
+                    className="block w-full text-sm text-gray-400
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-blue-950 file:text-white
+                      hover:file:bg-blue-900
+                      cursor-pointer"
+                  />
+                  {arquivoRGFile && (
+                    <button
+                      onClick={() => handleFileUpload(arquivoRGFile, "RG", "arquivoRG", setUploadingRG, setArquivoRGFile)}
+                      disabled={uploadingRG}
+                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {uploadingRG ? "Enviando..." : "Confirmar Upload RG"}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* CNH */}
+          <div className="bg-gray-800/50 p-4 rounded-lg">
+            <h5 className="text-md font-semibold text-white mb-3">CNH</h5>
+            <div className="space-y-2">
+              {local.arquivoCNH && (
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-gray-400">Arquivo atual:</span>
+                  <a 
+                    href={local.arquivoCNH.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 underline truncate max-w-xs"
+                  >
+                    {local.arquivoCNH.nomeArquivo}
+                  </a>
+                </div>
+              )}
+              {editing && (
+                <div className="space-y-2">
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => setArquivoCNHFile(e.target.files?.[0] || null)}
+                    className="block w-full text-sm text-gray-400
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-blue-950 file:text-white
+                      hover:file:bg-blue-900
+                      cursor-pointer"
+                  />
+                  {arquivoCNHFile && (
+                    <button
+                      onClick={() => handleFileUpload(arquivoCNHFile, "CNH", "arquivoCNH", setUploadingCNH, setArquivoCNHFile)}
+                      disabled={uploadingCNH}
+                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {uploadingCNH ? "Enviando..." : "Confirmar Upload CNH"}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* CPF */}
+          <div className="bg-gray-800/50 p-4 rounded-lg">
+            <h5 className="text-md font-semibold text-white mb-3">CPF</h5>
+            <div className="space-y-2">
+              {local.arquivoCPF && (
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-gray-400">Arquivo atual:</span>
+                  <a 
+                    href={local.arquivoCPF.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 underline truncate max-w-xs"
+                  >
+                    {local.arquivoCPF.nomeArquivo}
+                  </a>
+                </div>
+              )}
+              {editing && (
+                <div className="space-y-2">
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => setArquivoCPFFile(e.target.files?.[0] || null)}
+                    className="block w-full text-sm text-gray-400
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-blue-950 file:text-white
+                      hover:file:bg-blue-900
+                      cursor-pointer"
+                  />
+                  {arquivoCPFFile && (
+                    <button
+                      onClick={() => handleFileUpload(arquivoCPFFile, "CPF", "arquivoCPF", setUploadingCPF, setArquivoCPFFile)}
+                      disabled={uploadingCPF}
+                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {uploadingCPF ? "Enviando..." : "Confirmar Upload CPF"}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Comprovante de Residência */}
+          <div className="bg-gray-800/50 p-4 rounded-lg">
+            <h5 className="text-md font-semibold text-white mb-3">Comprovante de Residência</h5>
+            <div className="space-y-2">
+              {local.arquivoComprovanteResidencia && (
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-gray-400">Arquivo atual:</span>
+                  <a 
+                    href={local.arquivoComprovanteResidencia.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 underline truncate max-w-xs"
+                  >
+                    {local.arquivoComprovanteResidencia.nomeArquivo}
+                  </a>
+                </div>
+              )}
+              {editing && (
+                <div className="space-y-2">
+                  <input
+                    type="file"
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    onChange={(e) => setArquivoComprovanteFile(e.target.files?.[0] || null)}
+                    className="block w-full text-sm text-gray-400
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-blue-950 file:text-white
+                      hover:file:bg-blue-900
+                      cursor-pointer"
+                  />
+                  {arquivoComprovanteFile && (
+                    <button
+                      onClick={() => handleFileUpload(arquivoComprovanteFile, "Comprovante", "arquivoComprovanteResidencia", setUploadingComprovante, setArquivoComprovanteFile)}
+                      disabled={uploadingComprovante}
+                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {uploadingComprovante ? "Enviando..." : "Confirmar Upload Comprovante"}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Currículo */}
+          <div className="bg-gray-800/50 p-4 rounded-lg">
+            <h5 className="text-md font-semibold text-white mb-3">Currículo</h5>
+            <div className="space-y-2">
+              {local.arquivoCurriculo && (
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-gray-400">Arquivo atual:</span>
+                  <a 
+                    href={local.arquivoCurriculo.url} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 underline truncate max-w-xs"
+                  >
+                    {local.arquivoCurriculo.nomeArquivo}
+                  </a>
+                </div>
+              )}
+              {editing && (
+                <div className="space-y-2">
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    onChange={(e) => setArquivoCurriculoFile(e.target.files?.[0] || null)}
+                    className="block w-full text-sm text-gray-400
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded file:border-0
+                      file:text-sm file:font-semibold
+                      file:bg-blue-950 file:text-white
+                      hover:file:bg-blue-900
+                      cursor-pointer"
+                  />
+                  {arquivoCurriculoFile && (
+                    <button
+                      onClick={() => handleFileUpload(arquivoCurriculoFile, "Curriculo", "arquivoCurriculo", setUploadingCurriculo, setArquivoCurriculoFile)}
+                      disabled={uploadingCurriculo}
+                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {uploadingCurriculo ? "Enviando..." : "Confirmar Upload Currículo"}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </section>
     </div>
