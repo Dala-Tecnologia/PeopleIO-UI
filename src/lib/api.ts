@@ -35,7 +35,7 @@ async function getAccessToken() {
 }
 
 export const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL, // Ajuste para a URL da sua API .NET
+    baseURL: import.meta.env.DEV ? "/api/v1" : import.meta.env.VITE_API_BASE_URL,
 });
 
 api.interceptors.request.use(async (config) => {
@@ -45,5 +45,14 @@ api.interceptors.request.use(async (config) => {
     } catch (error) {
         console.error("Erro ao anexar token:", error);
     }
+
+    if (import.meta.env.DEV && (config.method === "post" || config.method === "put")) {
+        console.log("[api] Enviando request:", {
+            method: config.method,
+            url: config.url,
+            data: config.data,
+        });
+    }
+
     return config;
 });
