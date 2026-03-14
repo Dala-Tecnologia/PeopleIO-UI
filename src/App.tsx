@@ -8,6 +8,7 @@ import { Loader } from './components/ui/loader';
 import { Notification } from './components/ui/Notification';
 import { NotificationContext } from './components/ui/NotificationContext';
 import type { NotificationData } from './components/ui/NotificationContext';
+import { CandidatoFeed } from './components/form/CandidatoFeed';
 
 // Imports do MSAL (Azure AD)
 import { MsalProvider, AuthenticatedTemplate, UnauthenticatedTemplate } from "@azure/msal-react";
@@ -82,6 +83,7 @@ export default function App() {
         <Route path="/" element={<Navigate to="/candidatos" replace={true} />} />
         <Route path="/candidatos" element={<CandidatoList/>} />
         <Route path="/candidato/novo" element={<FormularioCandidato />} />
+        <Route path="/candidato/feed" element={<CandidatoFeed />} />
         <Route path="/candidato/:id" element={<CandidatoProfile />} />
         <Route path="/loader" element={<Loader />} />
       </Routes>

@@ -12,6 +12,7 @@ import { DocumentosOpcionaisForm } from "./DocumentosOpcionaisForm";
 import { useBlobUploader } from "@/hooks/useBlobUploader";
 import { candidatoService } from "@/services/candidatoService";
 import { useNotification } from "@/components/ui/NotificationContext";
+import { cleanFormData } from "@/lib/cleanFormData";
 
 export const FormularioCandidato = () => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -179,9 +180,11 @@ export const FormularioCandidato = () => {
         fotoUrl,
       };
 
-      console.log("Payload sendo enviado:", payload);
+      const cleanedPayload = cleanFormData(payload) as FormData;
+
+      console.log("Payload sendo enviado:", cleanedPayload);
       
-      await candidatoService.create(payload);
+      await candidatoService.create(cleanedPayload);
       setIsLoading(false);
       showNotification({ message: "Dados salvos com sucesso!", type: "success" });
       navigate("/candidato");
