@@ -13,7 +13,7 @@ type SelectFieldProps<T extends FieldValues,> = {
   name: Path<T>;
   label: ReactNode;
   placeholder?: string;
-  options: string[];
+  options: { value: string; label: string }[];
   className?: string;
 };
 
@@ -40,8 +40,8 @@ export const SelectField = <T extends FieldValues,>({
 
             <SelectContent>
               {options.map((opt) => (
-                <SelectItem key={opt} value={opt}>
-                  {opt}
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
                 </SelectItem>
               ))}
             </SelectContent>

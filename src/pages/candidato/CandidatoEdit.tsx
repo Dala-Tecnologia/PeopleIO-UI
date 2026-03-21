@@ -1,9 +1,16 @@
 import { useState } from "react";
-import type { FormData } from "@/types/FormData";
+import axios from "axios";
+import type { Arquivo, FormData } from "@/types/FormData";
 import { formatDateBROnly } from "@/functions/formatDate";
 import { useBlobUploader } from "@/hooks/useBlobUploader";
 import { candidatoService } from "@/services/candidatoService";
+import { documentoService } from "@/services/documentoService";
 import { cleanFormData } from "@/lib/cleanFormData";
+import { sexoOptions, corRacaOptions } from "@/constrants/options";
+
+type ValidationStatus = 'idle' | 'processing' | 'valid' | 'invalid';
+interface FileValidation { status: ValidationStatus; errorMessage?: string; }
+type AnexoKey = 'arquivoRG' | 'arquivoCNH' | 'arquivoCPF' | 'arquivoComprovanteResidencia' | 'arquivoCurriculo';
 
 interface CandidatoDataProps {
   candidato: FormData;
@@ -17,6 +24,7 @@ const DataField = ({
   editable = false,
   onChange,
   isDate = false,
+  selectOptions,
 }: {
   label: string;
   value: string | null | undefined;
@@ -24,15 +32,29 @@ const DataField = ({
   editable?: boolean;
   onChange?: (name: string | undefined, value: string) => void;
   isDate?: boolean;
+  selectOptions?: { value: string; label: string }[];
 }) => {
   if (!value && !editable) return null;
 
-  const displayValue = isDate ? formatDateBROnly(value) : value;
+  const displayValue = selectOptions
+    ? (selectOptions.find(o => o.value === value)?.label ?? value)
+    : isDate ? formatDateBROnly(value) : value;
 
   return (
     <div>
       <p className="text-sm text-gray-400">{label}</p>
-      {editable ? (
+      {editable && selectOptions ? (
+        <select
+          className="pio-input mt-1 w-full bg-gray-800 text-white p-2 rounded"
+          value={value ?? ""}
+          onChange={(e) => onChange?.(name, e.target.value)}
+        >
+          <option value="">Selecione...</option>
+          {selectOptions.map(o => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+      ) : editable ? (
         <input
           type={isDate ? "date" : "text"}
           className="pio-input mt-1 w-full bg-gray-800 text-white p-2 rounded"
@@ -46,8 +68,54 @@ const DataField = ({
   );
 };
 
+const fileInputClass = "block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-950 file:text-white hover:file:bg-blue-900 cursor-pointer";
+
+function AnexoUploadField({ label, arquivo, file, editing, validation, accept, onFileChange, onConfirm, confirmLabel }: {
+  label: string;
+  arquivo: Arquivo | null | undefined;
+  file: File | null;
+  editing: boolean;
+  validation: FileValidation;
+  accept: string;
+  onFileChange: (f: File | null) => void;
+  onConfirm: () => void;
+  confirmLabel: string;
+}) {
+  const isProcessing = validation.status === 'processing';
+  return (
+    <div className="bg-gray-800/50 p-4 rounded-lg">
+      <h5 className="text-md font-semibold text-white mb-3">{label}</h5>
+      <div className="space-y-2">
+        {arquivo && (
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-gray-400">Arquivo atual:</span>
+            <a href={arquivo.url} target="_blank" rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 underline truncate max-w-xs">
+              {arquivo.nomeArquivo}
+            </a>
+          </div>
+        )}
+        {editing && (
+          <div className="space-y-2">
+            <input type="file" accept={accept} className={fileInputClass}
+              onChange={(e) => onFileChange(e.target.files?.[0] || null)} />
+            {file && (
+              <button onClick={onConfirm} disabled={isProcessing}
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                {isProcessing ? "Enviando e validando..." : confirmLabel}
+              </button>
+            )}
+            {validation.status === 'valid' && <p className="text-sm text-green-400">✓ Documento aceito</p>}
+            {validation.status === 'invalid' && <p className="text-sm text-red-400">✗ {validation.errorMessage}</p>}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export const CandidatoData = ({ candidato, candidatoId }: CandidatoDataProps) => {
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(true);
   const [local, setLocal] = useState<FormData>(candidato);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(candidato.fotoUrl?.url || null);
@@ -61,14 +129,37 @@ export const CandidatoData = ({ candidato, candidatoId }: CandidatoDataProps) =>
   const [arquivoCPFFile, setArquivoCPFFile] = useState<File | null>(null);
   const [arquivoComprovanteFile, setArquivoComprovanteFile] = useState<File | null>(null);
   const [arquivoCurriculoFile, setArquivoCurriculoFile] = useState<File | null>(null);
-  
-  const [uploadingRG, setUploadingRG] = useState(false);
-  const [uploadingCNH, setUploadingCNH] = useState(false);
-  const [uploadingCPF, setUploadingCPF] = useState(false);
-  const [uploadingComprovante, setUploadingComprovante] = useState(false);
-  const [uploadingCurriculo, setUploadingCurriculo] = useState(false);
-  
+
+  const [anexoValidation, setAnexoValidation] = useState<Record<AnexoKey, FileValidation>>({
+    arquivoRG: { status: 'idle' },
+    arquivoCNH: { status: 'idle' },
+    arquivoCPF: { status: 'idle' },
+    arquivoComprovanteResidencia: { status: 'idle' },
+    arquivoCurriculo: { status: 'idle' },
+  });
+
   const { uploadFile } = useBlobUploader();
+
+  function setAnexoStatus(field: AnexoKey, validation: FileValidation) {
+    setAnexoValidation(prev => ({ ...prev, [field]: validation }));
+  }
+
+  function getApiError(error: unknown, fallback: string): string {
+    if (axios.isAxiosError(error) && error.response?.data?.errors?.[0]) {
+      return error.response.data.errors[0];
+    }
+    return fallback;
+  }
+
+  async function buildArquivo(file: File, prefix: string): Promise<{ arquivo: Arquivo; blobUrl: string }> {
+    const extension = file.name.split('.').pop();
+    const filename = `${prefix}-${crypto.randomUUID()}-${local.nome}.${extension}`;
+    const blobUrl = await uploadFile(file, filename, local.cpf);
+    return {
+      arquivo: { nomeArquivo: filename, url: blobUrl, tipoMime: file.type, dataUpload: new Date().toISOString() },
+      blobUrl,
+    };
+  }
 
   const setNestedValue = (obj: any, path: string, value: any) => {
     const keys = path.split(".");
@@ -130,40 +221,80 @@ export const CandidatoData = ({ candidato, candidatoId }: CandidatoDataProps) =>
     }
   };
 
-  // Funções de upload para anexos
-  const handleFileUpload = async (
+  const handleRGUpload = async () => {
+    if (!arquivoRGFile) return;
+    setAnexoStatus('arquivoRG', { status: 'processing' });
+    try {
+      const { arquivo, blobUrl } = await buildArquivo(arquivoRGFile, 'RG');
+      await documentoService.validarRG({
+        blobUrl,
+        identidadeNumero: local.identidadeNumero,
+        identidadeUF: local.identidadeUF,
+        identidadeDataEmissao: local.identidadeDataEmissao,
+      });
+      setLocal(prev => ({ ...prev, arquivoRG: arquivo }));
+      setArquivoRGFile(null);
+      setAnexoStatus('arquivoRG', { status: 'valid' });
+    } catch (error) {
+      setAnexoStatus('arquivoRG', { status: 'invalid', errorMessage: getApiError(error, 'Erro ao validar o RG. Verifique o documento e os dados cadastrados.') });
+    }
+  };
+
+  const handleCNHUpload = async () => {
+    if (!arquivoCNHFile) return;
+    setAnexoStatus('arquivoCNH', { status: 'processing' });
+    try {
+      const { arquivo, blobUrl } = await buildArquivo(arquivoCNHFile, 'CNH');
+      await documentoService.validarCNH({
+        blobUrl,
+        cnhNumero: local.cnhNumero,
+        cpf: local.cpf,
+        dataNascimento: local.dataNascimento,
+        cnhDataVencimento: local.cnhDataVencimento,
+      });
+      setLocal(prev => ({ ...prev, arquivoCNH: arquivo }));
+      setArquivoCNHFile(null);
+      setAnexoStatus('arquivoCNH', { status: 'valid' });
+    } catch (error) {
+      setAnexoStatus('arquivoCNH', { status: 'invalid', errorMessage: getApiError(error, 'Erro ao validar a CNH. Verifique o documento e os dados cadastrados.') });
+    }
+  };
+
+  const handleComprovanteUpload = async () => {
+    if (!arquivoComprovanteFile) return;
+    setAnexoStatus('arquivoComprovanteResidencia', { status: 'processing' });
+    try {
+      const { arquivo, blobUrl } = await buildArquivo(arquivoComprovanteFile, 'CR');
+      await documentoService.validarComprovante({
+        blobUrl,
+        nome: local.nome,
+        rua: local.endereco.rua,
+        cidade: local.endereco.cidade,
+        cep: local.endereco.cep,
+      });
+      setLocal(prev => ({ ...prev, arquivoComprovanteResidencia: arquivo }));
+      setArquivoComprovanteFile(null);
+      setAnexoStatus('arquivoComprovanteResidencia', { status: 'valid' });
+    } catch (error) {
+      setAnexoStatus('arquivoComprovanteResidencia', { status: 'invalid', errorMessage: getApiError(error, 'Erro ao validar o comprovante. Verifique o documento e os dados cadastrados.') });
+    }
+  };
+
+  const handleSimpleUpload = async (
     file: File | null,
     prefix: string,
-    fieldName: keyof FormData,
-    setUploading: (value: boolean) => void,
-    setFile: (value: File | null) => void
+    field: AnexoKey,
+    setFile: (v: File | null) => void
   ) => {
     if (!file) return;
-
-    setUploading(true);
+    setAnexoStatus(field, { status: 'processing' });
     try {
-      const filename = `${prefix}-${Date.now()}.${file.name.split(".").pop()}`;
-      const remotePath = await uploadFile(file, filename, local.cpf);
-
-      const newArquivo = {
-        nomeArquivo: file.name,
-        url: remotePath,
-        tipoMime: file.type,
-        dataUpload: new Date().toISOString(),
-      };
-
-      setLocal((prev) => ({
-        ...prev,
-        [fieldName]: newArquivo,
-      }));
-
+      const { arquivo } = await buildArquivo(file, prefix);
+      setLocal(prev => ({ ...prev, [field]: arquivo }));
       setFile(null);
-      console.log(`${prefix} atualizado com sucesso`);
-    } catch (error) {
-      console.error(`Erro ao fazer upload do ${prefix}:`, error);
-      alert(`Erro ao fazer upload do ${prefix}. Tente novamente.`);
-    } finally {
-      setUploading(false);
+      setAnexoStatus(field, { status: 'valid' });
+    } catch {
+      setAnexoStatus(field, { status: 'invalid', errorMessage: 'Erro ao enviar o arquivo. Tente novamente.' });
     }
   };
 
@@ -199,12 +330,18 @@ export const CandidatoData = ({ candidato, candidatoId }: CandidatoDataProps) =>
     setPhotoPreview(candidato.fotoUrl?.url || null);
     setSaveError(null);
     
-    // Limpar estados dos anexos
     setArquivoRGFile(null);
     setArquivoCNHFile(null);
     setArquivoCPFFile(null);
     setArquivoComprovanteFile(null);
     setArquivoCurriculoFile(null);
+    setAnexoValidation({
+      arquivoRG: { status: 'idle' },
+      arquivoCNH: { status: 'idle' },
+      arquivoCPF: { status: 'idle' },
+      arquivoComprovanteResidencia: { status: 'idle' },
+      arquivoCurriculo: { status: 'idle' },
+    });
   };
 
   return (
@@ -216,14 +353,6 @@ export const CandidatoData = ({ candidato, candidatoId }: CandidatoDataProps) =>
           </div>
         )}
         <div className="flex justify-end gap-2">
-          {!editing && (
-            <button
-              className="px-3 py-1 bg-blue-950 rounded text-white hover:bg-blue-900 disabled:opacity-50"
-              onClick={() => setEditing(true)}
-            >
-              Editar
-            </button>
-          )}
           {editing && (
             <>
               <button
@@ -289,11 +418,11 @@ export const CandidatoData = ({ candidato, candidatoId }: CandidatoDataProps) =>
           <DataField label="Nome Completo" value={local.nome} name="nome" editable={editing} onChange={handleFieldChange} />
           <DataField label="Nome Social" value={local.nomeSocial} name="nomeSocial" editable={editing} onChange={handleFieldChange} />
           <DataField label="CPF" value={local.cpf} name="cpf" onChange={handleFieldChange} />
-          <DataField label="Data de Nascimento" value={local.dataNascimento} name="dataNascimento" onChange={handleFieldChange} isDate={true} />
+          <DataField label="Data de Nascimento" value={local.dataNascimento} name="dataNascimento" editable={editing} onChange={handleFieldChange} isDate={true} />
           <DataField label="Email" value={local.email} name="email" editable={editing} onChange={handleFieldChange} />
           <DataField label="Telefone" value={local.telefone} name="telefone" editable={editing} onChange={handleFieldChange} />
-          <DataField label="Cor/Raça" value={local.corRaca} name="corRaca" editable={editing} onChange={handleFieldChange} />
-          <DataField label="Sexo" value={local.sexo} name="sexo" editable={editing} onChange={handleFieldChange} />
+          <DataField label="Cor/Raça" value={local.corRaca} name="corRaca" editable={editing} onChange={handleFieldChange} selectOptions={corRacaOptions} />
+          <DataField label="Sexo" value={local.sexo} name="sexo" editable={editing} onChange={handleFieldChange} selectOptions={sexoOptions} />
           <DataField label="Escolaridade" value={local.escolaridade} name="escolaridade" editable={editing} onChange={handleFieldChange} />
           <DataField label="Estado Civil" value={local.estadoCivil} name="estadoCivil" editable={editing} onChange={handleFieldChange} />
           <DataField label="Naturalidade" value={local.naturalidade} name="naturalidade" editable={editing} onChange={handleFieldChange} />
@@ -318,14 +447,14 @@ export const CandidatoData = ({ candidato, candidatoId }: CandidatoDataProps) =>
       <section>
         <h4 className="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-2">Documentação</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DataField label="RG - Número" value={local.identidadeNumero} name="identidadeNumero" onChange={handleFieldChange} />
-          <DataField label="RG - Órgão Emissor" value={local.identidadeOrgaoEmissor} name="identidadeOrgaoEmissor" onChange={handleFieldChange} />
-          <DataField label="RG - UF" value={local.identidadeUF} name="identidadeUF" onChange={handleFieldChange} />
-          <DataField label="RG - Data de Emissão" value={local.identidadeDataEmissao} name="identidadeDataEmissao" onChange={handleFieldChange} isDate={true} />
-          <DataField label="CTPS - Número" value={local.ctpsNumero} name="ctpsNumero" onChange={handleFieldChange} />
-          <DataField label="CTPS - Série" value={local.ctpsSerie} name="ctpsSerie" onChange={handleFieldChange} />
-          <DataField label="CTPS - Data de Emissão" value={local.ctpsDataEmissao} name="ctpsDataEmissao" onChange={handleFieldChange} isDate={true} />
-          <DataField label="CTPS - UF" value={local.ctpsuf} name="ctpsuf" onChange={handleFieldChange} />
+          <DataField label="RG - Número" value={local.identidadeNumero} name="identidadeNumero" editable={editing} onChange={handleFieldChange} />
+          <DataField label="RG - Órgão Emissor" value={local.identidadeOrgaoEmissor} name="identidadeOrgaoEmissor" editable={editing} onChange={handleFieldChange} />
+          <DataField label="RG - UF" value={local.identidadeUF} name="identidadeUF" editable={editing} onChange={handleFieldChange} />
+          <DataField label="RG - Data de Emissão" value={local.identidadeDataEmissao} name="identidadeDataEmissao" editable={editing} onChange={handleFieldChange} isDate={true} />
+          <DataField label="CTPS - Número" value={local.ctpsNumero} name="ctpsNumero" editable={editing} onChange={handleFieldChange} />
+          <DataField label="CTPS - Série" value={local.ctpsSerie} name="ctpsSerie" editable={editing} onChange={handleFieldChange} />
+          <DataField label="CTPS - Data de Emissão" value={local.ctpsDataEmissao} name="ctpsDataEmissao" editable={editing} onChange={handleFieldChange} isDate={true} />
+          <DataField label="CTPS - UF" value={local.ctpsuf} name="ctpsuf" editable={editing} onChange={handleFieldChange} />
         </div>
       </section>
       
@@ -358,229 +487,69 @@ export const CandidatoData = ({ candidato, candidatoId }: CandidatoDataProps) =>
         <h4 className="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-2">Anexos</h4>
         <div className="space-y-6">
           {/* RG */}
-          <div className="bg-gray-800/50 p-4 rounded-lg">
-            <h5 className="text-md font-semibold text-white mb-3">RG</h5>
-            <div className="space-y-2">
-              {local.arquivoRG && (
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-gray-400">Arquivo atual:</span>
-                  <a 
-                    href={local.arquivoRG.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 underline truncate max-w-xs"
-                  >
-                    {local.arquivoRG.nomeArquivo}
-                  </a>
-                </div>
-              )}
-              {editing && (
-                <div className="space-y-2">
-                  <input
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => setArquivoRGFile(e.target.files?.[0] || null)}
-                    className="block w-full text-sm text-gray-400
-                      file:mr-4 file:py-2 file:px-4
-                      file:rounded file:border-0
-                      file:text-sm file:font-semibold
-                      file:bg-blue-950 file:text-white
-                      hover:file:bg-blue-900
-                      cursor-pointer"
-                  />
-                  {arquivoRGFile && (
-                    <button
-                      onClick={() => handleFileUpload(arquivoRGFile, "RG", "arquivoRG", setUploadingRG, setArquivoRGFile)}
-                      disabled={uploadingRG}
-                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {uploadingRG ? "Enviando..." : "Confirmar Upload RG"}
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+          <AnexoUploadField
+            label="RG"
+            arquivo={local.arquivoRG}
+            file={arquivoRGFile}
+            editing={editing}
+            validation={anexoValidation.arquivoRG}
+            accept=".pdf,.jpg,.jpeg,.png"
+            onFileChange={(f) => { setArquivoRGFile(f); setAnexoStatus('arquivoRG', { status: 'idle' }); }}
+            onConfirm={handleRGUpload}
+            confirmLabel="Confirmar Upload RG"
+          />
 
           {/* CNH */}
-          <div className="bg-gray-800/50 p-4 rounded-lg">
-            <h5 className="text-md font-semibold text-white mb-3">CNH</h5>
-            <div className="space-y-2">
-              {local.arquivoCNH && (
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-gray-400">Arquivo atual:</span>
-                  <a 
-                    href={local.arquivoCNH.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 underline truncate max-w-xs"
-                  >
-                    {local.arquivoCNH.nomeArquivo}
-                  </a>
-                </div>
-              )}
-              {editing && (
-                <div className="space-y-2">
-                  <input
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => setArquivoCNHFile(e.target.files?.[0] || null)}
-                    className="block w-full text-sm text-gray-400
-                      file:mr-4 file:py-2 file:px-4
-                      file:rounded file:border-0
-                      file:text-sm file:font-semibold
-                      file:bg-blue-950 file:text-white
-                      hover:file:bg-blue-900
-                      cursor-pointer"
-                  />
-                  {arquivoCNHFile && (
-                    <button
-                      onClick={() => handleFileUpload(arquivoCNHFile, "CNH", "arquivoCNH", setUploadingCNH, setArquivoCNHFile)}
-                      disabled={uploadingCNH}
-                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {uploadingCNH ? "Enviando..." : "Confirmar Upload CNH"}
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+          <AnexoUploadField
+            label="CNH"
+            arquivo={local.arquivoCNH}
+            file={arquivoCNHFile}
+            editing={editing}
+            validation={anexoValidation.arquivoCNH}
+            accept=".pdf,.jpg,.jpeg,.png"
+            onFileChange={(f) => { setArquivoCNHFile(f); setAnexoStatus('arquivoCNH', { status: 'idle' }); }}
+            onConfirm={handleCNHUpload}
+            confirmLabel="Confirmar Upload CNH"
+          />
 
           {/* CPF */}
-          <div className="bg-gray-800/50 p-4 rounded-lg">
-            <h5 className="text-md font-semibold text-white mb-3">CPF</h5>
-            <div className="space-y-2">
-              {local.arquivoCPF && (
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-gray-400">Arquivo atual:</span>
-                  <a 
-                    href={local.arquivoCPF.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 underline truncate max-w-xs"
-                  >
-                    {local.arquivoCPF.nomeArquivo}
-                  </a>
-                </div>
-              )}
-              {editing && (
-                <div className="space-y-2">
-                  <input
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => setArquivoCPFFile(e.target.files?.[0] || null)}
-                    className="block w-full text-sm text-gray-400
-                      file:mr-4 file:py-2 file:px-4
-                      file:rounded file:border-0
-                      file:text-sm file:font-semibold
-                      file:bg-blue-950 file:text-white
-                      hover:file:bg-blue-900
-                      cursor-pointer"
-                  />
-                  {arquivoCPFFile && (
-                    <button
-                      onClick={() => handleFileUpload(arquivoCPFFile, "CPF", "arquivoCPF", setUploadingCPF, setArquivoCPFFile)}
-                      disabled={uploadingCPF}
-                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {uploadingCPF ? "Enviando..." : "Confirmar Upload CPF"}
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+          <AnexoUploadField
+            label="CPF"
+            arquivo={local.arquivoCPF}
+            file={arquivoCPFFile}
+            editing={editing}
+            validation={anexoValidation.arquivoCPF}
+            accept=".pdf,.jpg,.jpeg,.png"
+            onFileChange={(f) => { setArquivoCPFFile(f); setAnexoStatus('arquivoCPF', { status: 'idle' }); }}
+            onConfirm={() => handleSimpleUpload(arquivoCPFFile, 'CPF', 'arquivoCPF', setArquivoCPFFile)}
+            confirmLabel="Confirmar Upload CPF"
+          />
 
           {/* Comprovante de Residência */}
-          <div className="bg-gray-800/50 p-4 rounded-lg">
-            <h5 className="text-md font-semibold text-white mb-3">Comprovante de Residência</h5>
-            <div className="space-y-2">
-              {local.arquivoComprovanteResidencia && (
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-gray-400">Arquivo atual:</span>
-                  <a 
-                    href={local.arquivoComprovanteResidencia.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 underline truncate max-w-xs"
-                  >
-                    {local.arquivoComprovanteResidencia.nomeArquivo}
-                  </a>
-                </div>
-              )}
-              {editing && (
-                <div className="space-y-2">
-                  <input
-                    type="file"
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    onChange={(e) => setArquivoComprovanteFile(e.target.files?.[0] || null)}
-                    className="block w-full text-sm text-gray-400
-                      file:mr-4 file:py-2 file:px-4
-                      file:rounded file:border-0
-                      file:text-sm file:font-semibold
-                      file:bg-blue-950 file:text-white
-                      hover:file:bg-blue-900
-                      cursor-pointer"
-                  />
-                  {arquivoComprovanteFile && (
-                    <button
-                      onClick={() => handleFileUpload(arquivoComprovanteFile, "Comprovante", "arquivoComprovanteResidencia", setUploadingComprovante, setArquivoComprovanteFile)}
-                      disabled={uploadingComprovante}
-                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {uploadingComprovante ? "Enviando..." : "Confirmar Upload Comprovante"}
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+          <AnexoUploadField
+            label="Comprovante de Residência"
+            arquivo={local.arquivoComprovanteResidencia}
+            file={arquivoComprovanteFile}
+            editing={editing}
+            validation={anexoValidation.arquivoComprovanteResidencia}
+            accept=".pdf,.jpg,.jpeg,.png"
+            onFileChange={(f) => { setArquivoComprovanteFile(f); setAnexoStatus('arquivoComprovanteResidencia', { status: 'idle' }); }}
+            onConfirm={handleComprovanteUpload}
+            confirmLabel="Confirmar Upload Comprovante"
+          />
 
           {/* Currículo */}
-          <div className="bg-gray-800/50 p-4 rounded-lg">
-            <h5 className="text-md font-semibold text-white mb-3">Currículo</h5>
-            <div className="space-y-2">
-              {local.arquivoCurriculo && (
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-gray-400">Arquivo atual:</span>
-                  <a 
-                    href={local.arquivoCurriculo.url} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:text-blue-300 underline truncate max-w-xs"
-                  >
-                    {local.arquivoCurriculo.nomeArquivo}
-                  </a>
-                </div>
-              )}
-              {editing && (
-                <div className="space-y-2">
-                  <input
-                    type="file"
-                    accept=".pdf,.doc,.docx"
-                    onChange={(e) => setArquivoCurriculoFile(e.target.files?.[0] || null)}
-                    className="block w-full text-sm text-gray-400
-                      file:mr-4 file:py-2 file:px-4
-                      file:rounded file:border-0
-                      file:text-sm file:font-semibold
-                      file:bg-blue-950 file:text-white
-                      hover:file:bg-blue-900
-                      cursor-pointer"
-                  />
-                  {arquivoCurriculoFile && (
-                    <button
-                      onClick={() => handleFileUpload(arquivoCurriculoFile, "Curriculo", "arquivoCurriculo", setUploadingCurriculo, setArquivoCurriculoFile)}
-                      disabled={uploadingCurriculo}
-                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {uploadingCurriculo ? "Enviando..." : "Confirmar Upload Currículo"}
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
+          <AnexoUploadField
+            label="Currículo"
+            arquivo={local.arquivoCurriculo}
+            file={arquivoCurriculoFile}
+            editing={editing}
+            validation={anexoValidation.arquivoCurriculo}
+            accept=".pdf,.doc,.docx"
+            onFileChange={(f) => { setArquivoCurriculoFile(f); setAnexoStatus('arquivoCurriculo', { status: 'idle' }); }}
+            onConfirm={() => handleSimpleUpload(arquivoCurriculoFile, 'Curriculo', 'arquivoCurriculo', setArquivoCurriculoFile)}
+            confirmLabel="Confirmar Upload Currículo"
+          />
         </div>
       </section>
     </div>

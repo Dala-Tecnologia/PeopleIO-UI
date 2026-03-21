@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { candidatoSchema } from "@/components/schemas/candidatoSchema";
-import type { FormData, FormDataInput } from "@/types/FormData";
+import type { Arquivo, FormData, FormDataInput } from "@/types/FormData";
 import { Loader } from "@/components/ui/loader";
 import { DadosPessoaisForm } from "./DadosPessoaisForm";
 import { DocumentosForm } from "./DocumentosForm";
@@ -14,14 +14,36 @@ import { candidatoService } from "@/services/candidatoService";
 import { useNotification } from "@/components/ui/NotificationContext";
 import { cleanFormData } from "@/lib/cleanFormData";
 
+type UploadedArquivos = Partial<{
+  arquivoRG: Arquivo;
+  arquivoCNH: Arquivo;
+  arquivoCPF: Arquivo;
+  arquivoComprovanteResidencia: Arquivo;
+  arquivoCurriculo: Arquivo;
+}>;
+
 export const FormularioCandidato = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [uploadedArquivos, setUploadedArquivos] = useState<UploadedArquivos>({});
+
+  const handleFileUploaded = (field: keyof UploadedArquivos, arquivo: Arquivo | null) => {
+    setUploadedArquivos(prev => {
+      if (!arquivo) {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      }
+      return { ...prev, [field]: arquivo };
+    });
+  };
+
   const {
     control,
     register,
     handleSubmit,
     setValue,
     trigger,
+    getValues,
     formState: { errors },
   } = useForm<FormDataInput>({
     resolver: zodResolver(candidatoSchema as any),
@@ -89,15 +111,12 @@ export const FormularioCandidato = () => {
     prefix: string,
     nome: string,
     cpf: string,
+    preUploaded?: Arquivo | null,
   ) {
-    if (!file) {
-      console.log(`[processFile] Arquivo ${prefix} é null, pulando upload`);
-      return null;
-    }
+    if (preUploaded) return preUploaded;
+    if (!file) return null;
 
     try {
-      console.log(`[processFile] Iniciando upload de ${prefix}: ${file.name}`);
-      
       const extension = file.name.split(".").pop();
       const filename = `${prefix}-${crypto.randomUUID()}-${nome}.${extension}`;
 
@@ -111,8 +130,6 @@ export const FormularioCandidato = () => {
       }
 
       const url = await uploadFn(file, filename, cpf);
-      
-      console.log(`[processFile] Upload de ${prefix} concluído: ${url}`);
 
       return {
         nomeArquivo: filename,
@@ -131,36 +148,11 @@ export const FormularioCandidato = () => {
       setIsLoading(true);
       console.log("Iniciando submissão do formulário...", data);
       
-      const arquivoRG = await processFile(
-        data.arquivoRG,
-        "RG",
-        data.nome,
-        data.cpf,
-      );
-      const arquivoCNH = await processFile(
-        data.arquivoCNH,
-        "CNH",
-        data.nome,
-        data.cpf,
-      );
-      const arquivoCPF = await processFile(
-        data.arquivoCPF,
-        "CPF",
-        data.nome,
-        data.cpf,
-      );
-      const arquivoCurriculo = await processFile(
-        data.arquivoCurriculo,
-        "Curriculo",
-        data.nome,
-        data.cpf,
-      );
-      const arquivoComprovanteResidencia = await processFile(
-        data.arquivoComprovanteResidencia,
-        "CR",
-        data.nome,
-        data.cpf,
-      );
+      const arquivoRG = await processFile(data.arquivoRG, "RG", data.nome, data.cpf, uploadedArquivos.arquivoRG);
+      const arquivoCNH = await processFile(data.arquivoCNH, "CNH", data.nome, data.cpf, uploadedArquivos.arquivoCNH);
+      const arquivoCPF = await processFile(data.arquivoCPF, "CPF", data.nome, data.cpf, uploadedArquivos.arquivoCPF);
+      const arquivoCurriculo = await processFile(data.arquivoCurriculo, "Curriculo", data.nome, data.cpf, uploadedArquivos.arquivoCurriculo);
+      const arquivoComprovanteResidencia = await processFile(data.arquivoComprovanteResidencia, "CR", data.nome, data.cpf, uploadedArquivos.arquivoComprovanteResidencia);
       const fotoUrl = await processFile(
         data.fotoUrl,
         "Foto",
@@ -245,6 +237,8 @@ export const FormularioCandidato = () => {
           control={control}
           setValue={setValue}
           errors={errors}
+          getValues={getValues}
+          onFileUploaded={handleFileUploaded}
         />
       ),
     },
