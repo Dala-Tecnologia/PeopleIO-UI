@@ -122,6 +122,7 @@ export const CandidatoData = ({ candidato, candidatoId }: CandidatoDataProps) =>
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   
   // Estados para os anexos
   const [arquivoRGFile, setArquivoRGFile] = useState<File | null>(null);
@@ -310,9 +311,8 @@ export const CandidatoData = ({ candidato, candidatoId }: CandidatoDataProps) =>
     try {
       const cleanedData = cleanFormData(local);
       await candidatoService.update(candidatoId, cleanedData);
-      console.log("Candidato atualizado com sucesso:", cleanedData);
-      setEditing(false);
       setPhotoFile(null);
+      setShowSuccessModal(true);
     } catch (error) {
       console.error("Erro ao salvar candidato:", error);
       setSaveError(
@@ -345,6 +345,26 @@ export const CandidatoData = ({ candidato, candidatoId }: CandidatoDataProps) =>
   };
 
   return (
+    <>
+    {showSuccessModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/70" />
+        <div className="relative bg-gray-800 rounded-lg shadow-xl p-8 flex flex-col items-center gap-4 min-w-[280px]">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-900">
+            <svg className="h-6 w-6 text-green-400" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-white">Dados atualizados!</h3>
+          <button
+            onClick={() => setShowSuccessModal(false)}
+            className="mt-2 px-6 py-2 bg-green-600 text-white rounded hover:bg-green-700 font-semibold"
+          >
+            Ok
+          </button>
+        </div>
+      </div>
+    )}
     <div className="space-y-8">
       <div className="flex flex-col gap-2">
         {saveError && (
@@ -553,5 +573,6 @@ export const CandidatoData = ({ candidato, candidatoId }: CandidatoDataProps) =>
         </div>
       </section>
     </div>
+    </>
   );
 }
