@@ -6,7 +6,7 @@ import { useBlobUploader } from "@/hooks/useBlobUploader";
 import { candidatoService } from "@/services/candidatoService";
 import { documentoService } from "@/services/documentoService";
 import { cleanFormData } from "@/lib/cleanFormData";
-import { sexoOptions, corRacaOptions } from "@/constrants/options";
+import { sexoOptions, corRacaOptions, escolaridadeOptions, estadoCivilOptions } from "@/constrants/options";
 
 type ValidationStatus = 'idle' | 'processing' | 'valid' | 'invalid';
 interface FileValidation { status: ValidationStatus; errorMessage?: string; }
@@ -443,8 +443,8 @@ export const CandidatoData = ({ candidato, candidatoId }: CandidatoDataProps) =>
           <DataField label="Telefone" value={local.telefone} name="telefone" editable={editing} onChange={handleFieldChange} />
           <DataField label="Cor/Raça" value={local.corRaca} name="corRaca" editable={editing} onChange={handleFieldChange} selectOptions={corRacaOptions} />
           <DataField label="Sexo" value={local.sexo} name="sexo" editable={editing} onChange={handleFieldChange} selectOptions={sexoOptions} />
-          <DataField label="Escolaridade" value={local.escolaridade} name="escolaridade" editable={editing} onChange={handleFieldChange} />
-          <DataField label="Estado Civil" value={local.estadoCivil} name="estadoCivil" editable={editing} onChange={handleFieldChange} />
+          <DataField label="Escolaridade" value={local.escolaridade} name="escolaridade" editable={editing} onChange={handleFieldChange} selectOptions={escolaridadeOptions} />
+          <DataField label="Estado Civil" value={local.estadoCivil} name="estadoCivil" editable={editing} onChange={handleFieldChange} selectOptions={estadoCivilOptions} />
           <DataField label="Naturalidade" value={local.naturalidade} name="naturalidade" editable={editing} onChange={handleFieldChange} />
           <DataField label="Nacionalidade" value={local.nacionalidade} name="nacionalidade" editable={editing} onChange={handleFieldChange} />
         </div>
