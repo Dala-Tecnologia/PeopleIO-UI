@@ -1,4 +1,3 @@
-import './App.css'
 import { useState, useEffect } from 'react';
 import Header from '@/components/base/Header'
 import { FormularioCandidato } from './components/form/FormularioCandidato'
@@ -62,23 +61,12 @@ export default function App() {
       {/* Conteúdo visível apenas quando NÃO autenticado */}
       <UnauthenticatedTemplate>
           <PortalLayout />
-          {/*
-          <div className="flex flex-col items-center justify-center min-h-screen bg-bg-primary">
-              <h1 className="text-2xl font-bold mb-4 text-text-primary">Bem-vindo ao PeopleIO</h1>
-              <button 
-                  onClick={handleLogin}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                  Entrar com Azure AD
-              </button>
-          </div>
-          */}
       </UnauthenticatedTemplate>
 
       {/* Conteúdo visível apenas quando autenticado */}
       <AuthenticatedTemplate>
       <Header />
-      <main className="flex-grow isolate px-6 py-24 sm:py-32 lg:px-8">
+      <main className="flex-grow isolate px-6 py-14 sm:py-14 lg:px-8">
       <Routes>
         <Route path="/" element={<Navigate to="/candidatos" replace={true} />} />
         <Route path="/candidatos" element={<CandidatoList/>} />

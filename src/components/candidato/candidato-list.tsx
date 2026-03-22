@@ -86,7 +86,7 @@ export const CandidatoList = () => {
   return (
     <>
       {isLoading && <Loader />}
-      <div className="mx-auto mb-25 max-w-2xl text-center">
+      <div className="mx-auto mb-10 max-w-2xl text-center">
         <h2 className="text-4xl font-semibold tracking-tight app-heading sm:text-5xl">
           Candidatos
         </h2>

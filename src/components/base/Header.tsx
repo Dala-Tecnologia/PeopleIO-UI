@@ -224,7 +224,6 @@ const Header = () => {
   return (
     <header className="bg-blue-950 text-white shadow-md relative z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-        {/* Logo */}
         <Link
           to="/"
           className="text-xl font-bold tracking-wide hover:opacity-80 transition flex items-center gap-2"
@@ -301,7 +300,7 @@ const Header = () => {
                 aria-pressed={language === "pt"}
                 disabled={!isTranslatorReady}
               >
-                PT
+                BR
               </button>
               <button
                 type="button"
